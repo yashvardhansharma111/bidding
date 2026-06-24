@@ -235,7 +235,7 @@ export default async function HomePage() {
             <h3 className="font-bold text-gray-900 mb-2">Verified Devices</h3>
             <p className="text-sm text-gray-500 mb-3">Every phone passes our 10-point quality check before listing:</p>
             <ul className="text-xs text-gray-500 space-y-1">
-              {["IMEI verified", "Screen tested (no dead pixels)", "Battery health check", "Camera front & back", "Charging port working", "Speaker & mic tested", "All buttons functional", "No major scratches", "SIM tray present", "Condition graded A/B/C"].map((pt) => (
+              {["IMEI Verified", "Display Tested", "Touch Tested", "Camera Tested", "Speaker Tested", "Mic Tested", "Charging Tested", "Battery Checked", "Network Tested", "Buttons Tested"].map((pt) => (
                 <li key={pt} className="flex items-center gap-1.5">
                   <CheckCircle size={11} className="text-green-500 shrink-0" />
                   {pt}

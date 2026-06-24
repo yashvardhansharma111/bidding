@@ -28,14 +28,16 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-[#2874F0] shadow-md">
       {/* Top bar */}
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center gap-4 h-16">
+        <div className="flex items-center gap-2 sm:gap-4 h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Gavel className="text-[#FFE500]" size={28} />
+            <Gavel className="text-[#FFE500]" size={26} />
             <div className="hidden sm:block">
               <span className="text-white font-bold text-xl leading-none">CashBid</span>
               <span className="text-[#FFE500] text-xs block leading-none italic">Bid More. Pay Less.</span>
             </div>
+            {/* Show brand name on mobile too */}
+            <span className="sm:hidden text-white font-bold text-lg leading-none">CashBid</span>
           </Link>
 
           {/* Search */}
@@ -45,21 +47,21 @@ export function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for phones, brands, models..."
-                className="flex-1 px-4 py-2.5 text-sm text-gray-900 outline-none"
+                placeholder="Search phones..."
+                className="flex-1 px-3 py-2.5 text-sm text-gray-900 outline-none min-w-0"
               />
               <button
                 type="submit"
-                className="bg-[#FFE500] px-4 py-2.5 hover:bg-yellow-400 transition-colors"
+                className="bg-[#FFE500] px-3 py-2.5 hover:bg-yellow-400 transition-colors shrink-0"
                 aria-label="Search"
               >
-                <Search size={18} className="text-[#2874F0]" />
+                <Search size={16} className="text-[#2874F0]" />
               </button>
             </div>
           </form>
 
           {/* Actions */}
-          <div className="flex items-center gap-1 sm:gap-3 ml-auto">
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             {isAuthenticated && user ? (
               <>
                 {/* Notifications */}
@@ -72,7 +74,7 @@ export function Header() {
                   )}
                 </Link>
 
-                {/* Wallet / bid count */}
+                {/* Wallet / bid count — desktop only */}
                 <Link
                   href="/dashboard/wallet"
                   className="hidden sm:flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors"
@@ -81,13 +83,13 @@ export function Header() {
                   {Math.floor((user.walletBalance ?? 0) / 100)} bid{Math.floor((user.walletBalance ?? 0) / 100) !== 1 ? "s" : ""}
                 </Link>
 
-                {/* Watchlist */}
+                {/* Watchlist — desktop only */}
                 <Link href="/dashboard/watchlist" className="hidden sm:block p-2 text-white hover:text-[#FFE500] transition-colors">
                   <Heart size={22} />
                 </Link>
 
-                {/* User menu */}
-                <div className="relative">
+                {/* User avatar + dropdown — desktop */}
+                <div className="relative hidden sm:block">
                   <button
                     onClick={() => setUserDropdown(!userDropdown)}
                     className="flex items-center gap-1.5 text-white hover:text-[#FFE500] transition-colors p-1"
@@ -95,8 +97,8 @@ export function Header() {
                     <div className="w-8 h-8 rounded-full bg-[#FFE500] flex items-center justify-center">
                       <span className="text-[#2874F0] font-bold text-sm">{user.name[0].toUpperCase()}</span>
                     </div>
-                    <span className="hidden sm:block text-sm font-medium">{user.name.split(" ")[0]}</span>
-                    <ChevronDown size={14} className="hidden sm:block" />
+                    <span className="text-sm font-medium">{user.name.split(" ")[0]}</span>
+                    <ChevronDown size={14} />
                   </button>
 
                   <AnimatePresence>
@@ -138,7 +140,8 @@ export function Header() {
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-2">
+              /* Login/Register — desktop only; mobile uses hamburger menu */
+              <div className="hidden sm:flex items-center gap-2">
                 <Link
                   href="/login"
                   className="text-white text-sm font-medium px-3 py-1.5 rounded border border-white/30 hover:bg-white/10 transition-colors"
@@ -154,13 +157,13 @@ export function Header() {
               </div>
             )}
 
-            {/* Mobile menu button */}
+            {/* Hamburger — mobile only */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="sm:hidden p-2 text-white"
               aria-label="Toggle menu"
             >
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -193,43 +196,86 @@ export function Header() {
             exit={{ height: 0 }}
             className="sm:hidden overflow-hidden bg-[#1a5dcf]"
           >
-            <nav className="px-4 py-2 flex flex-col gap-0.5">
+            <nav className="px-4 py-2 flex flex-col">
+              {/* Auctions links */}
+              <p className="text-white/50 text-[10px] uppercase tracking-widest font-bold pt-2 pb-1">Auctions</p>
               {[
-                { href: "/auctions?status=live",     label: "Live Auctions" },
-                { href: "/auctions?status=upcoming", label: "Upcoming"      },
-                { href: "/auctions?category=bulk",   label: "Bulk Lots"     },
-                { href: "/auctions?condition=refurbished", label: "Refurbished" },
+                { href: "/auctions?status=live",          label: "Live Auctions" },
+                { href: "/auctions?status=upcoming",      label: "Upcoming"      },
+                { href: "/auctions?category=bulk",        label: "Bulk Lots"     },
+                { href: "/auctions?condition=refurbished",label: "Refurbished"   },
               ].map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className="text-white py-2.5 text-sm font-medium border-b border-white/10 last:border-0"
+                  className="text-white py-2.5 text-sm font-medium border-b border-white/10"
                 >
                   {item.label}
                 </Link>
               ))}
-              {isAuthenticated && user && (
+
+              {isAuthenticated && user ? (
                 <>
-                  <div className="pt-1 pb-0.5">
-                    <p className="text-white/50 text-xs uppercase tracking-wide font-semibold py-1">My Account</p>
+                  {/* User info */}
+                  <div className="flex items-center gap-3 py-3 border-b border-white/10">
+                    <div className="w-9 h-9 rounded-full bg-[#FFE500] flex items-center justify-center shrink-0">
+                      <span className="text-[#2874F0] font-bold">{user.name[0].toUpperCase()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white font-semibold text-sm truncate">{user.name}</p>
+                      <p className="text-white/60 text-xs truncate">{user.email}</p>
+                    </div>
                   </div>
+                  <p className="text-white/50 text-[10px] uppercase tracking-widest font-bold pt-2 pb-1">My Account</p>
                   {[
-                    { href: "/dashboard/wallet",        label: `Wallet · ${Math.floor((user.walletBalance ?? 0) / 100)} bids` },
-                    { href: "/dashboard/watchlist",     label: "Watchlist"   },
-                    { href: "/dashboard/bids",          label: "My Bids"     },
+                    { href: "/dashboard",               label: "Dashboard"     },
+                    { href: "/dashboard/wallet",        label: `Wallet — ${Math.floor((user.walletBalance ?? 0) / 100)} bids available` },
+                    { href: "/dashboard/bids",          label: "My Bids"       },
+                    { href: "/dashboard/orders",        label: "Orders"        },
+                    { href: "/dashboard/watchlist",     label: "Watchlist"     },
                     { href: "/dashboard/notifications", label: "Notifications" },
+                    { href: "/dashboard/invite",        label: "Invite & Earn" },
                   ].map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
                       onClick={() => setMenuOpen(false)}
-                      className="text-white/90 py-2.5 text-sm font-medium border-b border-white/10 last:border-0"
+                      className="text-white/90 py-2.5 text-sm font-medium border-b border-white/10"
                     >
                       {item.label}
                     </Link>
                   ))}
+                  {user.role === "admin" && (
+                    <Link href="/admin" onClick={() => setMenuOpen(false)} className="text-[#FFE500] py-2.5 text-sm font-bold border-b border-white/10">
+                      Admin Panel
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => { setMenuOpen(false); logout(); }}
+                    className="text-left text-red-300 py-3 text-sm font-medium"
+                  >
+                    Sign Out
+                  </button>
                 </>
+              ) : (
+                /* Not logged in — show Login + Register */
+                <div className="flex gap-3 py-4">
+                  <Link
+                    href="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex-1 text-center text-white font-semibold text-sm py-2.5 rounded-lg border border-white/30 hover:bg-white/10 transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex-1 text-center text-[#2874F0] font-bold text-sm py-2.5 rounded-lg bg-[#FFE500] hover:bg-yellow-300 transition-colors"
+                  >
+                    Register Free
+                  </Link>
+                </div>
               )}
             </nav>
           </motion.div>
