@@ -9,12 +9,20 @@ export interface IOrderDoc extends Document {
   status: "won" | "pending_payment" | "paid" | "shipped" | "delivered" | "cancelled";
   payment?: mongoose.Types.ObjectId;
   shippingAddress?: {
+    name: string;
+    phone: string;
     line1: string;
     line2?: string;
     city: string;
     state: string;
     pincode: string;
   };
+  shiprocketOrderId?: number;
+  shipmentId?: number;
+  awbCode?: string;
+  courierName?: string;
+  trackingUrl?: string;
+  shippingLabel?: string;
 }
 
 const OrderSchema = new Schema<IOrderDoc>(
@@ -31,12 +39,20 @@ const OrderSchema = new Schema<IOrderDoc>(
     },
     payment: { type: Schema.Types.ObjectId, ref: "Payment" },
     shippingAddress: {
+      name: String,
+      phone: String,
       line1: String,
       line2: String,
       city: String,
       state: String,
       pincode: String,
     },
+    shiprocketOrderId: { type: Number },
+    shipmentId: { type: Number },
+    awbCode: { type: String },
+    courierName: { type: String },
+    trackingUrl: { type: String },
+    shippingLabel: { type: String },
   },
   { timestamps: true }
 );

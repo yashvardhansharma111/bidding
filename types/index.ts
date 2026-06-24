@@ -18,6 +18,20 @@ export interface IUser {
   isBanned: boolean;
   isVerified: boolean;
   walletBalance: number;
+  bonusBalance: number;
+  referralCode: string;
+  referredBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IWithdrawalRequest {
+  _id: string;
+  user: string | IUser;
+  amount: number;
+  upiId: string;
+  status: "pending" | "approved" | "rejected";
+  adminNote?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -100,12 +114,20 @@ export interface IOrder {
   status: OrderStatus;
   payment?: string | IPayment;
   shippingAddress?: {
+    name?: string;
+    phone?: string;
     line1: string;
     line2?: string;
     city: string;
     state: string;
     pincode: string;
   };
+  shiprocketOrderId?: number;
+  shipmentId?: number;
+  awbCode?: string;
+  courierName?: string;
+  trackingUrl?: string;
+  shippingLabel?: string;
   createdAt: string;
   updatedAt: string;
 }

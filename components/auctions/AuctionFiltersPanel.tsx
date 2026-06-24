@@ -8,22 +8,16 @@ interface AuctionFiltersPanelProps {
 }
 
 const BRANDS = ["Apple", "Samsung", "OnePlus", "Xiaomi", "Oppo", "Vivo", "Realme", "Nokia"];
-const CONDITIONS = [
-  { value: "new", label: "New" },
-  { value: "open_box", label: "Open Box" },
-  { value: "refurbished", label: "Refurbished" },
-  { value: "used", label: "Used" },
-];
 const STATUSES = [
-  { value: "live", label: "Live Now" },
-  { value: "upcoming", label: "Upcoming" },
-  { value: "ended", label: "Ended" },
+  { value: "live",     label: "Live Now"  },
+  { value: "upcoming", label: "Upcoming"  },
+  { value: "ended",    label: "Ended"     },
 ];
-const RAM_OPTIONS = ["2GB", "4GB", "6GB", "8GB", "12GB", "16GB"];
-const STORAGE_OPTIONS = ["32GB", "64GB", "128GB", "256GB", "512GB", "1TB"];
+const RAM_OPTIONS     = ["2GB", "4GB", "6GB", "8GB", "12GB", "16GB"];
+const STORAGE_OPTIONS = ["32GB", "64GB", "128GB", "256GB", "512GB"];
 
 export function AuctionFiltersPanel({ currentFilters }: AuctionFiltersPanelProps) {
-  const router = useRouter();
+  const router   = useRouter();
   const pathname = usePathname();
   const [local, setLocal] = useState(currentFilters);
 
@@ -41,8 +35,7 @@ export function AuctionFiltersPanel({ currentFilters }: AuctionFiltersPanelProps
   };
 
   const toggle = (key: string, value: string) => {
-    const current = local[key];
-    apply({ [key]: current === value ? "" : value });
+    apply({ [key]: local[key] === value ? "" : value });
   };
 
   const hasFilters = Object.values(local).some(Boolean);
@@ -89,24 +82,6 @@ export function AuctionFiltersPanel({ currentFilters }: AuctionFiltersPanelProps
             >
               {brand}
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Condition */}
-      <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Condition</p>
-        <div className="space-y-1.5">
-          {CONDITIONS.map(({ value, label }) => (
-            <label key={value} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={local.condition === value}
-                onChange={() => toggle("condition", value)}
-                className="accent-[#2874F0]"
-              />
-              <span className="text-sm text-gray-700">{label}</span>
-            </label>
           ))}
         </div>
       </div>

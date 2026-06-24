@@ -19,6 +19,7 @@ export async function GET() {
         .lean(),
       Order.find({ winner: user._id })
         .sort({ createdAt: -1 })
+        .select("auction winner finalAmount deliveryCharges totalAmount status payment shippingAddress awbCode courierName trackingUrl shippingLabel shiprocketOrderId shipmentId createdAt updatedAt")
         .populate({ path: "auction", select: "title images brand model" })
         .lean(),
       Watchlist.find({ user: user._id })

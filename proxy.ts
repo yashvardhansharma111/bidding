@@ -17,7 +17,7 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = req.cookies.get("bidkart_token")?.value;
+  const token = req.cookies.get("cashbid_token")?.value;
 
   // Admin pages: require admin role
   if (ADMIN_PATHS.some((p) => pathname.startsWith(p)) && !pathname.startsWith("/api")) {

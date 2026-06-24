@@ -27,9 +27,9 @@ export function useAuth() {
   );
 
   const register = useCallback(
-    async (name: string, email: string, password: string, phone?: string) => {
+    async (name: string, email: string, password: string, phone?: string, referralCode?: string) => {
       try {
-        const { data } = await axios.post("/api/auth/register", { name, email, password, phone });
+        const { data } = await axios.post("/api/auth/register", { name, email, password, phone, referralCode });
         setUser(data.data.user);
         toast.success("Account created!");
         router.push("/");
@@ -43,6 +43,13 @@ export function useAuth() {
     [setUser, router]
   );
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const { data } = await axios.get("/api/auth/me");
+      setUser(data.data.user);
+    } catch { /* silent */ }
+  }, [setUser]);
+
   const logout = useCallback(async () => {
     try {
       await axios.post("/api/auth/logout");
@@ -53,5 +60,5 @@ export function useAuth() {
     }
   }, [storeLogout, router]);
 
-  return { user, isAuthenticated, isLoading, login, register, logout };
+  return { user, isAuthenticated, isLoading, login, register, logout, refreshUser };
 }

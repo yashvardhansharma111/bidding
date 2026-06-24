@@ -1,7 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { Wallet, ArrowDownCircle, ArrowUpCircle, Clock } from "lucide-react";
+import { Wallet, ArrowDownCircle, ArrowUpCircle, Clock, Plus, Gift, Send } from "lucide-react";
+import Script from "next/script";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Transaction {
   _id: string;
@@ -12,26 +14,118 @@ interface Transaction {
   createdAt: string;
 }
 
+interface WithdrawalRequest {
+  _id: string;
+  amount: number;
+  upiId: string;
+  status: "pending" | "approved" | "rejected";
+  adminNote?: string;
+  createdAt: string;
+}
+
 const TX_ICONS: Record<string, { icon: typeof Wallet; color: string; sign: string }> = {
-  registration_credit: { icon: ArrowDownCircle, color: "text-green-500", sign: "+" },
-  admin_credit:        { icon: ArrowDownCircle, color: "text-green-500", sign: "+" },
-  admin_debit:         { icon: ArrowUpCircle,   color: "text-red-500",   sign: "-" },
-  bid_hold:            { icon: ArrowUpCircle,   color: "text-orange-500",sign: "-" },
-  bid_refund:          { icon: ArrowDownCircle, color: "text-blue-500",  sign: "+" },
-  auction_won_debit:   { icon: ArrowUpCircle,   color: "text-red-500",   sign: "-" },
+  registration_credit: { icon: ArrowDownCircle, color: "text-green-500",  sign: "+" },
+  topup:               { icon: ArrowDownCircle, color: "text-green-500",  sign: "+" },
+  admin_credit:        { icon: ArrowDownCircle, color: "text-green-500",  sign: "+" },
+  admin_debit:         { icon: ArrowUpCircle,   color: "text-red-500",    sign: "-" },
+  bid_hold:            { icon: ArrowUpCircle,   color: "text-orange-500", sign: "-" },
+  bid_refund:          { icon: ArrowDownCircle, color: "text-blue-500",   sign: "+" },
+  auction_won_debit:   { icon: ArrowUpCircle,   color: "text-red-500",    sign: "-" },
+  referral_bonus:      { icon: Gift,            color: "text-purple-500", sign: "+" },
+  withdrawal:          { icon: Send,            color: "text-red-500",    sign: "-" },
 };
 
-export default function WalletPage() {
-  const [balance, setBalance] = useState<number | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+const TOPUP_OPTIONS = [
+  { amount: 100,  bids: 1,  label: "₹100",  sublabel: "1 Bid",   popular: false },
+  { amount: 500,  bids: 5,  label: "₹500",  sublabel: "5 Bids",  popular: true  },
+  { amount: 1000, bids: 10, label: "₹1000", sublabel: "10 Bids", popular: false },
+];
 
-  useEffect(() => {
-    axios.get("/api/wallet").then(({ data }) => {
-      setBalance(data.data.balance);
-      setTransactions(data.data.transactions);
+declare global {
+  interface Window {
+    Razorpay: new (opts: Record<string, unknown>) => { open(): void };
+  }
+}
+
+export default function WalletPage() {
+  const { refreshUser } = useAuth();
+  const [balance, setBalance] = useState<number | null>(null);
+  const [bonusBalance, setBonusBalance] = useState(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [topupLoading, setTopupLoading] = useState(false);
+  const [tab, setTab] = useState<"transactions" | "withdraw">("transactions");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [upiId, setUpiId] = useState("");
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [withdrawError, setWithdrawError] = useState("");
+
+  const load = useCallback(() => {
+    Promise.all([
+      axios.get("/api/wallet"),
+      axios.get("/api/wallet/withdraw"),
+    ]).then(([walletRes, withdrawRes]) => {
+      setBalance(walletRes.data.data.balance);
+      setBonusBalance(walletRes.data.data.bonusBalance ?? 0);
+      setTransactions(walletRes.data.data.transactions);
+      setWithdrawals(withdrawRes.data.data.requests);
     }).finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleTopup = async (amount: number) => {
+    setTopupLoading(true);
+    try {
+      const { data } = await axios.post("/api/wallet/topup", { amount });
+      const { orderId, keyId } = data.data;
+
+      const rzp = new window.Razorpay({
+        key: keyId,
+        amount: amount * 100,
+        currency: "INR",
+        name: "CashBid",
+        description: "Wallet Top-up",
+        order_id: orderId,
+        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          await axios.post("/api/wallet/topup/verify", {
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+            amount,
+          });
+          await Promise.all([load(), refreshUser()]);
+        },
+        theme: { color: "#2874F0" },
+      });
+      rzp.open();
+    } catch {
+      alert("Failed to initiate payment. Try again.");
+    } finally {
+      setTopupLoading(false);
+    }
+  };
+
+  const handleWithdraw = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setWithdrawError("");
+    const amt = Number(withdrawAmount);
+    if (!amt || amt < 100) { setWithdrawError("Minimum withdrawal is ₹100"); return; }
+    if (!upiId.trim()) { setWithdrawError("Enter your UPI ID"); return; }
+    setWithdrawLoading(true);
+    try {
+      await axios.post("/api/wallet/withdraw", { amount: amt, upiId: upiId.trim() });
+      setWithdrawAmount("");
+      setUpiId("");
+      load();
+    } catch (err: unknown) {
+      const axErr = err as { response?: { data?: { error?: string } } };
+      setWithdrawError(axErr.response?.data?.error ?? "Failed to submit request");
+    } finally {
+      setWithdrawLoading(false);
+    }
+  };
 
   const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
   const fmtDate = (d: string) => new Date(d).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" });
@@ -40,56 +134,187 @@ export default function WalletPage() {
     return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-[#2874F0] border-t-transparent rounded-full animate-spin" /></div>;
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Balance card */}
-      <div className="bg-gradient-to-r from-[#2874F0] to-blue-700 rounded-2xl p-6 text-white">
-        <div className="flex items-center gap-3 mb-4">
-          <Wallet size={24} className="text-[#FFE500]" />
-          <span className="font-semibold text-blue-200">BidKart Wallet</span>
-        </div>
-        <p className="text-4xl font-bold">{balance !== null ? fmt(balance) : "—"}</p>
-        <p className="text-blue-200 text-sm mt-1">Available balance</p>
-        <p className="text-blue-300 text-xs mt-3">Minimum ₹100 required to place bids</p>
-      </div>
+  const bidCount = Math.floor((balance ?? 0) / 100);
 
-      {/* Transactions */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-        <div className="p-4 border-b border-gray-100">
-          <h2 className="font-bold text-gray-900">Transaction History</h2>
-        </div>
-        {transactions.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <Clock size={32} className="mx-auto mb-2 opacity-40" />
-            <p>No transactions yet</p>
+  return (
+    <>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+
+      <div className="space-y-6">
+        {/* Balance cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-gradient-to-r from-[#2874F0] to-blue-700 rounded-2xl p-6 text-white">
+            <div className="flex items-center gap-3 mb-3">
+              <Wallet size={22} className="text-[#FFE500]" />
+              <span className="font-semibold text-blue-200 text-sm">Wallet Balance</span>
+            </div>
+            <p className="text-4xl font-bold">{balance !== null ? fmt(balance) : "—"}</p>
+            <p className="text-blue-200 text-sm mt-1">
+              {bidCount} bid{bidCount !== 1 ? "s" : ""} available · ₹100 per bid
+            </p>
           </div>
-        ) : (
-          <div className="divide-y divide-gray-50">
-            {transactions.map((tx) => {
-              const meta = TX_ICONS[tx.type] ?? { icon: Wallet, color: "text-gray-400", sign: "" };
-              const Icon = meta.icon;
-              const isCredit = meta.sign === "+";
-              return (
-                <div key={tx._id} className="flex items-center gap-4 px-4 py-3.5">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center ${isCredit ? "bg-green-50" : "bg-red-50"}`}>
-                    <Icon size={18} className={meta.color} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">{tx.description}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{fmtDate(tx.createdAt)}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className={`font-bold text-sm ${isCredit ? "text-green-600" : "text-red-600"}`}>
-                      {meta.sign}{fmt(tx.amount)}
-                    </p>
-                    <p className="text-xs text-gray-400">Bal: {fmt(tx.balanceAfter)}</p>
+
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
+            <div className="flex items-center gap-3 mb-3">
+              <Gift size={22} className="text-yellow-300" />
+              <span className="font-semibold text-purple-200 text-sm">Bonus Balance</span>
+            </div>
+            <p className="text-4xl font-bold">{fmt(bonusBalance)}</p>
+            <p className="text-purple-200 text-sm mt-1">Redeemable at device purchase only</p>
+          </div>
+        </div>
+
+        {/* Top-up section */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Plus size={18} className="text-[#2874F0]" />
+            <h2 className="font-bold text-gray-900">Top Up Wallet</h2>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {TOPUP_OPTIONS.map(({ amount, bids, label, sublabel, popular }) => (
+              <button
+                key={amount}
+                onClick={() => handleTopup(amount)}
+                disabled={topupLoading}
+                className={`relative flex flex-col items-center justify-center rounded-xl border-2 py-4 px-3 transition-all hover:shadow-md disabled:opacity-60 ${
+                  popular
+                    ? "border-[#2874F0] bg-blue-50"
+                    : "border-gray-200 bg-white hover:border-[#2874F0]"
+                }`}
+              >
+                {popular && (
+                  <span className="absolute -top-2.5 bg-[#2874F0] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    POPULAR
+                  </span>
+                )}
+                <span className="text-xl font-black text-gray-900">{label}</span>
+                <span className="text-sm font-semibold text-[#2874F0] mt-0.5">{sublabel}</span>
+                <span className="text-xs text-gray-400 mt-1">₹100 each</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tabs: transactions / withdraw */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+          <div className="flex border-b border-gray-100">
+            {(["transactions", "withdraw"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+                  tab === t ? "text-[#2874F0] border-b-2 border-[#2874F0]" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {t === "transactions" ? "Transaction History" : "Withdraw"}
+              </button>
+            ))}
+          </div>
+
+          {tab === "transactions" && (
+            <>
+              {transactions.length === 0 ? (
+                <div className="text-center py-12 text-gray-400">
+                  <Clock size={32} className="mx-auto mb-2 opacity-40" />
+                  <p>No transactions yet</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-50">
+                  {transactions.map((tx) => {
+                    const meta = TX_ICONS[tx.type] ?? { icon: Wallet, color: "text-gray-400", sign: "" };
+                    const Icon = meta.icon;
+                    const isCredit = meta.sign === "+";
+                    return (
+                      <div key={tx._id} className="flex items-center gap-4 px-4 py-3.5">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${isCredit ? "bg-green-50" : "bg-red-50"}`}>
+                          <Icon size={18} className={meta.color} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-800 truncate">{tx.description}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{fmtDate(tx.createdAt)}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className={`font-bold text-sm ${isCredit ? "text-green-600" : "text-red-600"}`}>
+                            {meta.sign}{fmt(tx.amount)}
+                          </p>
+                          <p className="text-xs text-gray-400">Bal: {fmt(tx.balanceAfter)}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {tab === "withdraw" && (
+            <div className="p-5 space-y-5">
+              {/* Request form */}
+              <form onSubmit={handleWithdraw} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
+                  <input
+                    type="number"
+                    min={100}
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                    placeholder="Min ₹100"
+                    className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-[#2874F0] transition-colors"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Available: {fmt(balance ?? 0)}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">UPI ID</label>
+                  <input
+                    type="text"
+                    value={upiId}
+                    onChange={(e) => setUpiId(e.target.value)}
+                    placeholder="yourname@upi"
+                    className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-[#2874F0] transition-colors"
+                  />
+                </div>
+                {withdrawError && <p className="text-red-500 text-sm">{withdrawError}</p>}
+                <button
+                  type="submit"
+                  disabled={withdrawLoading}
+                  className="w-full bg-[#2874F0] text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
+                >
+                  {withdrawLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send size={16} />}
+                  Request Withdrawal
+                </button>
+                <p className="text-xs text-gray-400 text-center">
+                  Bonus balance cannot be withdrawn. Withdrawals are processed within 24 hours.
+                </p>
+              </form>
+
+              {/* Withdrawal history */}
+              {withdrawals.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-gray-700 text-sm mb-3">Withdrawal Requests</h3>
+                  <div className="space-y-2">
+                    {withdrawals.map((w) => (
+                      <div key={w._id} className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">{fmt(w.amount)}</p>
+                          <p className="text-xs text-gray-400">{w.upiId} · {fmtDate(w.createdAt)}</p>
+                          {w.adminNote && <p className="text-xs text-gray-500 mt-0.5">{w.adminNote}</p>}
+                        </div>
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                          w.status === "pending"  ? "bg-yellow-100 text-yellow-700" :
+                          w.status === "approved" ? "bg-green-100 text-green-700"  :
+                          "bg-red-100 text-red-700"
+                        }`}>
+                          {w.status.charAt(0).toUpperCase() + w.status.slice(1)}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

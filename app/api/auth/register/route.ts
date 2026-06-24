@@ -1,9 +1,13 @@
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db/connect";
 import User from "@/lib/db/models/User";
+import WalletTransaction from "@/lib/db/models/WalletTransaction";
+import { signToken } from "@/lib/auth/jwt";
+import { setAuthCookie } from "@/lib/auth/cookies";
 import { registerSchema } from "@/lib/validations";
 import { apiSuccess, apiError } from "@/lib/utils/api";
-import { createOrder } from "@/lib/payment/razorpay";
+
+const REFERRAL_BONUS = 200;
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,30 +16,64 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return apiError(parsed.error.issues[0]?.message ?? "Validation error", 422);
 
     await connectDB();
-    const { name, email, password, phone } = parsed.data;
+    const { name, email, password, phone, referralCode } = parsed.data;
 
     const existing = await User.findOne({ email });
-    if (existing && existing.isVerified) return apiError("Email already registered", 409);
+    if (existing) return apiError("Email already registered", 409);
 
-    // Remove unverified duplicate if retrying
-    if (existing && !existing.isVerified) {
-      await User.deleteOne({ _id: existing._id });
+    // Validate referral code if provided
+    let referrer = null;
+    if (referralCode) {
+      referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+      if (!referrer) return apiError("Invalid referral code", 400);
     }
 
-    const user = await User.create({ name, email, password, phone, isVerified: false, walletBalance: 0 });
+    const user = await User.create({
+      name, email, password, phone,
+      isVerified: true,
+      walletBalance: 0,
+      bonusBalance: referrer ? REFERRAL_BONUS : 0,
+      referredBy: referrer?._id,
+    });
 
-    const razorpayOrder = await createOrder(50000, `reg_${user._id}`); // ₹500 = 50000 paise
+    // Award bonus to both parties if referral used
+    if (referrer) {
+      await User.findByIdAndUpdate(referrer._id, { $inc: { bonusBalance: REFERRAL_BONUS } });
+
+      await WalletTransaction.create({
+        user: user._id,
+        type: "referral_bonus",
+        amount: REFERRAL_BONUS,
+        balanceAfter: REFERRAL_BONUS,
+        description: `Referral bonus — joined via ${referrer.name}'s invite`,
+      });
+
+      await WalletTransaction.create({
+        user: referrer._id,
+        type: "referral_bonus",
+        amount: REFERRAL_BONUS,
+        balanceAfter: (referrer.bonusBalance ?? 0) + REFERRAL_BONUS,
+        description: `Referral bonus — ${name} joined using your code`,
+      });
+    }
+
+    const token = signToken({ userId: user._id.toString(), email: user.email, role: user.role });
+    await setAuthCookie(token);
 
     return apiSuccess(
       {
-        userId: user._id.toString(),
-        razorpayOrderId: razorpayOrder.id,
-        razorpayKeyId: process.env.RAZORPAY_KEY_ID,
-        amount: 500,
-        name,
-        email,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          walletBalance: 0,
+          bonusBalance: user.bonusBalance,
+          referralCode: user.referralCode,
+          isVerified: true,
+        },
       },
-      "Account created. Complete payment to activate.",
+      "Registration successful",
       201
     );
   } catch (err) {

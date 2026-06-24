@@ -24,7 +24,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .sort({ amount: -1 })
       .lean();
 
-    const finalAmount = winnerBid?.amount ?? auction.currentBid;
+    const devicePrice = winnerBid?.amount ?? auction.currentBid;
+    // Winner already paid ₹100 for the winning bid — deduct from final price
+    const finalAmount = Math.max(0, devicePrice - 100);
 
     // Remove existing order if re-assigning
     await Order.deleteOne({ auction: id });

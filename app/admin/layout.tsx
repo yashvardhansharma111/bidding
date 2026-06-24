@@ -3,14 +3,16 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { Gavel, LayoutDashboard, Package, Users, ListOrdered, LogOut, ChevronRight } from "lucide-react";
+import { Gavel, LayoutDashboard, Package, Users, ListOrdered, LogOut, ChevronRight, Send } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/auctions", label: "Auctions", icon: Package },
+  { href: "/admin/orders", label: "Orders", icon: Package },
   { href: "/admin/bids", label: "All Bids", icon: ListOrdered },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/withdrawals", label: "Withdrawals", icon: Send },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -43,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/" className="flex items-center gap-2">
             <Gavel size={22} className="text-[#FFE500]" />
             <div>
-              <span className="font-bold text-white">BidKart</span>
+              <span className="font-bold text-white">CashBid</span>
               <span className="block text-xs text-gray-400">Admin Panel</span>
             </div>
           </Link>

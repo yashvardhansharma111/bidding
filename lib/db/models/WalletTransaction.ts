@@ -2,11 +2,14 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export type WalletTxType =
   | "registration_credit"
+  | "topup"
   | "admin_credit"
   | "admin_debit"
   | "bid_hold"
   | "bid_refund"
-  | "auction_won_debit";
+  | "auction_won_debit"
+  | "referral_bonus"
+  | "withdrawal";
 
 export interface IWalletTransactionDoc extends Document {
   user: mongoose.Types.ObjectId;
@@ -22,7 +25,7 @@ const WalletTransactionSchema = new Schema<IWalletTransactionDoc>(
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     type: {
       type: String,
-      enum: ["registration_credit", "admin_credit", "admin_debit", "bid_hold", "bid_refund", "auction_won_debit"],
+      enum: ["registration_credit", "topup", "admin_credit", "admin_debit", "bid_hold", "bid_refund", "auction_won_debit", "referral_bonus", "withdrawal"],
       required: true,
     },
     amount: { type: Number, required: true },

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const files = ['app/api/wallet/topup/route.ts','app/api/wallet/topup/verify/route.ts','app/api/wallet/withdraw/route.ts','app/api/admin/withdrawals/route.ts','app/api/admin/withdrawals/[id]/route.ts','lib/db/models/WithdrawalRequest.ts','app/\\(main\\)/dashboard/invite/page.tsx','app/admin/withdrawals/page.tsx']; const fs=require\\('fs'\\); files.forEach\\(f => { try { fs.accessSync\\(f\\); console.log\\('OK:', f\\); } catch { console.log\\('MISSING:', f\\); } }\\);\")",
+      "PowerShell(Get-ChildItem D:\\\\bidding -Name | Where-Object { $_ -match \"middleware|proxy\" })"
+    ]
+  }
+}

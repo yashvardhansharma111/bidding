@@ -10,14 +10,19 @@ export async function GET() {
     await connectDB();
 
     const [user, transactions] = await Promise.all([
-      User.findById(me._id).select("walletBalance isVerified").lean(),
+      User.findById(me._id).select("walletBalance bonusBalance referralCode isVerified").lean(),
       WalletTransaction.find({ user: me._id })
         .sort({ createdAt: -1 })
         .limit(50)
         .lean(),
     ]);
 
-    return apiSuccess({ balance: user?.walletBalance ?? 0, transactions });
+    return apiSuccess({
+      balance: user?.walletBalance ?? 0,
+      bonusBalance: user?.bonusBalance ?? 0,
+      referralCode: user?.referralCode ?? "",
+      transactions,
+    });
   } catch (err) {
     console.error("[wallet]", err);
     if ((err as Error).message === "Unauthorized") return apiError("Unauthorized", 401);

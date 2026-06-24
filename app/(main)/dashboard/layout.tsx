@@ -1,13 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gavel, Heart, Bell, Package, Wallet } from "lucide-react";
+import { Gavel, Heart, Bell, Package, Wallet, Gift } from "lucide-react";
 
 const TABS = [
   { href: "/dashboard", label: "Overview", icon: Gavel, exact: true },
   { href: "/dashboard/bids", label: "My Bids", icon: Gavel },
   { href: "/dashboard/orders", label: "Orders", icon: Package },
   { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
+  { href: "/dashboard/invite", label: "Invite & Earn", icon: Gift },
   { href: "/dashboard/watchlist", label: "Watchlist", icon: Heart },
   { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
 ];

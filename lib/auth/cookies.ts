@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-const COOKIE_NAME = "bidkart_token";
+const COOKIE_NAME = "cashbid_token";
 
 export async function setAuthCookie(token: string) {
   const cookieStore = await cookies();

@@ -3,11 +3,11 @@ import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
 
 export const metadata: Metadata = {
-  title: { default: "BidKart — Bid. Win. Own.", template: "%s | BidKart" },
+  title: { default: "CashBid — Bid. Win. Own.", template: "%s | CashBid" },
   description: "India's premier mobile phone auction platform. Bid on new, refurbished, and bulk devices.",
-  keywords: ["mobile auction", "phone bidding", "refurbished phones", "bulk phones", "BidKart"],
+  keywords: ["mobile auction", "phone bidding", "refurbished phones", "bulk phones", "CashBid"],
   openGraph: {
-    title: "BidKart — Mobile Phone Auctions",
+    title: "CashBid — Mobile Phone Auctions",
     description: "Bid on premium mobile phones at unbeatable prices",
     type: "website",
   },

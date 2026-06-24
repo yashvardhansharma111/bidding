@@ -5,7 +5,7 @@ process.loadEnvFile(".env.local");
 
 const ADMIN_EMAIL = "admin@bidkart.com";
 const ADMIN_PASSWORD = "Admin@123456";
-const ADMIN_NAME = "BidKart Admin";
+const ADMIN_NAME = "CashBid Admin";
 
 async function main() {
   const uri = process.env.MONGODB_URI;

@@ -8,9 +8,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 text-white">
             <Gavel size={32} className="text-[#FFE500]" />
-            <span className="text-3xl font-bold">BidKart</span>
+            <span className="text-3xl font-bold">CashBid</span>
           </Link>
-          <p className="text-blue-200 mt-1 text-sm">India&apos;s Mobile Phone Auction Platform</p>
+          <p className="text-blue-200 mt-1 text-sm">India's Hidden Mobile Auction Platform</p>
         </div>
         <div className="bg-white rounded-2xl shadow-2xl p-8">{children}</div>
       </div>

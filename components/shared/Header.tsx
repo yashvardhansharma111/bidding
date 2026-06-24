@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Bell, Heart, User, Menu, X, ChevronDown, Gavel } from "lucide-react";
+import { Search, Bell, Heart, User, Menu, X, ChevronDown, Gavel, Wallet } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -33,8 +33,8 @@ export function Header() {
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Gavel className="text-[#FFE500]" size={28} />
             <div className="hidden sm:block">
-              <span className="text-white font-bold text-xl leading-none">BidKart</span>
-              <span className="text-[#FFE500] text-xs block leading-none italic">Bid. Win. Own.</span>
+              <span className="text-white font-bold text-xl leading-none">CashBid</span>
+              <span className="text-[#FFE500] text-xs block leading-none italic">Bid More. Pay Less.</span>
             </div>
           </Link>
 
@@ -70,6 +70,15 @@ export function Header() {
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}
+                </Link>
+
+                {/* Wallet / bid count */}
+                <Link
+                  href="/dashboard/wallet"
+                  className="hidden sm:flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors"
+                >
+                  <Wallet size={14} className="text-[#FFE500]" />
+                  {Math.floor((user.walletBalance ?? 0) / 100)} bid{Math.floor((user.walletBalance ?? 0) / 100) !== 1 ? "s" : ""}
                 </Link>
 
                 {/* Watchlist */}

@@ -5,6 +5,7 @@ export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).regex(/[A-Z]/, "Need uppercase").regex(/[0-9]/, "Need number"),
   phone: z.string().optional(),
+  referralCode: z.string().optional(),
 });
 
 export const loginSchema = z.object({

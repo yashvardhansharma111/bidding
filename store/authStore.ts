@@ -23,7 +23,7 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => set({ user: null, isAuthenticated: false, isLoading: false }),
     }),
     {
-      name: "bidkart-auth",
+      name: "cashbid-auth",
       partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
     }
   )

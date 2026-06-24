@@ -14,6 +14,10 @@ interface Order {
   totalAmount: number;
   deliveryCharges: number;
   createdAt: string;
+  awbCode?: string;
+  courierName?: string;
+  trackingUrl?: string;
+  shippingLabel?: string;
   auction: {
     _id: string;
     title: string;
@@ -111,6 +115,26 @@ export default function OrdersPage() {
                     >
                       <CreditCard size={15} /> Pay Now — {formatCurrency(order.totalAmount)} <ArrowRight size={14} />
                     </Link>
+                  </div>
+                )}
+                {(order.status === "shipped" || order.status === "delivered") && order.awbCode && (
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Truck size={15} className="text-purple-500" />
+                      <span className="font-medium">{order.courierName}</span>
+                      <span className="text-gray-400">·</span>
+                      <span className="text-gray-500">AWB: {order.awbCode}</span>
+                    </div>
+                    {order.trackingUrl && (
+                      <a
+                        href={order.trackingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-200 px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-purple-100 transition-colors"
+                      >
+                        <Truck size={13} /> Track Package <ArrowRight size={13} />
+                      </a>
+                    )}
                   </div>
                 )}
               </div>

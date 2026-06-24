@@ -4,9 +4,12 @@ import Auction from "@/lib/db/models/Auction";
 import Bid from "@/lib/db/models/Bid";
 import Notification from "@/lib/db/models/Notification";
 import User from "@/lib/db/models/User";
+import WalletTransaction from "@/lib/db/models/WalletTransaction";
 import { requireAuth } from "@/lib/auth/getCurrentUser";
 import { bidSchema } from "@/lib/validations";
 import { apiSuccess, apiError } from "@/lib/utils/api";
+
+const BID_COST = 100; // ₹100 per bid
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -36,8 +39,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     // Check wallet eligibility
     const bidder = await User.findById(user._id).select("isVerified walletBalance").lean();
-    if (!bidder?.isVerified) return apiError("Complete account verification (₹500 registration fee) to bid", 403);
-    if ((bidder.walletBalance ?? 0) < 100) return apiError("Insufficient wallet balance. Please top up your wallet.", 403);
+    if (!bidder?.isVerified) return apiError("Please verify your account to bid.", 403);
+    if ((bidder.walletBalance ?? 0) < BID_COST) return apiError(`Insufficient wallet balance. You need ₹${BID_COST} to place a bid.`, 403);
 
     const auction = await Auction.findById(id);
     if (!auction) return apiError("Auction not found", 404);
@@ -62,6 +65,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       amount,
       isAutoBid: parsed.data.isAutoBid,
       maxAutoBid: parsed.data.maxAutoBid,
+    });
+
+    // Deduct ₹100 bid cost from wallet
+    const newBalance = (bidder.walletBalance ?? 0) - BID_COST;
+    await User.findByIdAndUpdate(user._id, { $inc: { walletBalance: -BID_COST } });
+    await WalletTransaction.create({
+      user: user._id,
+      type: "bid_hold",
+      amount: BID_COST,
+      balanceAfter: newBalance,
+      description: `Bid placed on auction — ₹${amount.toLocaleString("en-IN")}`,
+      ref: bid._id.toString(),
     });
 
     // Check if this is a new unique bidder
