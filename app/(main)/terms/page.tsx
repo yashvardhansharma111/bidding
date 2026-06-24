@@ -1,12 +1,26 @@
 import type { Metadata } from "next";
+import type React from "react";
 import { Shield, RotateCcw, Package, Gavel, Wallet, Truck, AlertTriangle, CheckCircle } from "lucide-react";
+
+interface ContentBlock {
+  subtitle?: string;
+  text?: string;
+  list?: string[];
+}
 
 export const metadata: Metadata = {
   title: "Terms & Conditions — CashBid",
   description: "CashBid Terms & Conditions, Warranty Policy, and Platform Rules.",
 };
 
-const sections = [
+const sections: {
+  icon: React.ElementType;
+  number: string;
+  title: string;
+  color: string;
+  bg: string;
+  content: ContentBlock[];
+}[] = [
   {
     icon: Gavel,
     number: "1",
