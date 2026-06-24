@@ -57,29 +57,31 @@ export default function BidsPage() {
             const isLive = bid.auction.status === "live";
             return (
               <Link key={bid._id} href={`/auctions/${bid.auction._id}`} className="block bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-shadow">
-                <div className="flex gap-4 items-center">
-                  <div className="w-16 h-16 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
+                <div className="flex gap-3 items-center">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
                     {bid.auction.images?.[0] ? (
                       <img src={bid.auction.images[0]} alt={bid.auction.title} className="w-full h-full object-contain p-1 rounded-lg" />
                     ) : <Gavel size={20} className="text-gray-300" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{bid.auction.title}</h3>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-semibold text-gray-900 text-sm line-clamp-1 flex-1">{bid.auction.title}</h3>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-bold text-[#2874F0] flex items-center gap-1">
+                          <TrendingUp size={12} />
+                          {formatCurrency(bid.auction.currentBid)}
+                        </p>
+                        <p className="text-[10px] text-gray-400">current</p>
+                      </div>
+                    </div>
                     <p className="text-xs text-gray-400">{bid.auction.brand} • {formatDate(bid.createdAt)}</p>
-                    <div className="flex items-center gap-3 mt-1.5">
+                    <div className="flex items-center gap-2 mt-1">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${isLeading ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
                         {isLeading ? "Leading" : "Outbid"}
                       </span>
                       <span className="text-xs text-gray-500">Your bid: {formatCurrency(bid.amount)}</span>
+                      {isLive && <CountdownTimer endTime={bid.auction.endTime} label="" />}
                     </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-[#2874F0]">
-                      <TrendingUp size={13} className="inline mr-1" />
-                      {formatCurrency(bid.auction.currentBid)}
-                    </p>
-                    <p className="text-xs text-gray-400">current</p>
-                    {isLive && <CountdownTimer endTime={bid.auction.endTime} label="" />}
                   </div>
                 </div>
               </Link>

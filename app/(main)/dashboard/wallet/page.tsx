@@ -143,23 +143,23 @@ export default function WalletPage() {
       <div className="space-y-6">
         {/* Balance cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-gradient-to-r from-[#2874F0] to-blue-700 rounded-2xl p-6 text-white">
+          <div className="bg-gradient-to-r from-[#2874F0] to-blue-700 rounded-2xl p-4 sm:p-6 text-white">
             <div className="flex items-center gap-3 mb-3">
               <Wallet size={22} className="text-[#FFE500]" />
               <span className="font-semibold text-blue-200 text-sm">Wallet Balance</span>
             </div>
-            <p className="text-4xl font-bold">{balance !== null ? fmt(balance) : "—"}</p>
+            <p className="text-3xl sm:text-4xl font-bold">{balance !== null ? fmt(balance) : "—"}</p>
             <p className="text-blue-200 text-sm mt-1">
               {bidCount} bid{bidCount !== 1 ? "s" : ""} available · ₹100 per bid
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-4 sm:p-6 text-white">
             <div className="flex items-center gap-3 mb-3">
               <Gift size={22} className="text-yellow-300" />
               <span className="font-semibold text-purple-200 text-sm">Bonus Balance</span>
             </div>
-            <p className="text-4xl font-bold">{fmt(bonusBalance)}</p>
+            <p className="text-3xl sm:text-4xl font-bold">{fmt(bonusBalance)}</p>
             <p className="text-purple-200 text-sm mt-1">Redeemable at device purchase only</p>
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function WalletPage() {
                 key={amount}
                 onClick={() => handleTopup(amount)}
                 disabled={topupLoading}
-                className={`relative flex flex-col items-center justify-center rounded-xl border-2 py-4 px-3 transition-all hover:shadow-md disabled:opacity-60 ${
+                className={`relative flex flex-col items-center justify-center rounded-xl border-2 py-3 sm:py-4 px-2 sm:px-3 transition-all hover:shadow-md disabled:opacity-60 ${
                   popular
                     ? "border-[#2874F0] bg-blue-50"
                     : "border-gray-200 bg-white hover:border-[#2874F0]"

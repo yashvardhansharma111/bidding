@@ -23,7 +23,7 @@ export function ImageGallery({ images }: { images: string[] }) {
     <>
       <div className="space-y-3">
         {/* Main image */}
-        <div className="relative w-full h-80 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 group cursor-zoom-in" onClick={() => setLightbox(true)}>
+        <div className="relative w-full h-64 sm:h-80 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 group cursor-zoom-in" onClick={() => setLightbox(true)}>
           <AnimatePresence mode="wait">
             <motion.div
               key={selected}
@@ -45,10 +45,10 @@ export function ImageGallery({ images }: { images: string[] }) {
 
           {images.length > 1 && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1.5 shadow hover:bg-white transition-all opacity-0 group-hover:opacity-100">
+              <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-1.5 shadow hover:bg-white transition-all sm:opacity-0 sm:group-hover:opacity-100">
                 <ChevronLeft size={18} />
               </button>
-              <button onClick={(e) => { e.stopPropagation(); next(); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1.5 shadow hover:bg-white transition-all opacity-0 group-hover:opacity-100">
+              <button onClick={(e) => { e.stopPropagation(); next(); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-1.5 shadow hover:bg-white transition-all sm:opacity-0 sm:group-hover:opacity-100">
                 <ChevronRight size={18} />
               </button>
             </>

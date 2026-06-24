@@ -12,7 +12,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </Link>
           <p className="text-blue-200 mt-1 text-sm">India's Hidden Mobile Auction Platform</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-2xl p-8">{children}</div>
+        <div className="bg-white rounded-2xl shadow-2xl p-5 sm:p-8">{children}</div>
       </div>
     </div>
   );

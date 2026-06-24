@@ -42,3 +42,7 @@ body {
 }
 
 .timer-urgent { animation: timerPulse 1s ease-in-out infinite; }
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

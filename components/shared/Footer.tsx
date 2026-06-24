@@ -21,10 +21,10 @@ export function Footer() {
             <h4 className="text-white font-semibold mb-4">Auctions</h4>
             <ul className="space-y-2 text-sm">
               {[
-                { href: "/auctions?status=live",     label: "Live Auctions" },
-                { href: "/auctions?status=upcoming", label: "Upcoming"      },
-                { href: "/auctions?brand=Apple",     label: "iPhone"        },
-                { href: "/auctions?brand=Samsung",   label: "Samsung"       },
+                { href: "/auctions?status=live",          label: "Live Auctions"     },
+                { href: "/auctions?status=upcoming",      label: "Upcoming"          },
+                { href: "/auctions?condition=refurbished", label: "Refurbished"      },
+                { href: "/auctions?category=bulk",         label: "Bulk Lots"        },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="hover:text-white transition-colors">{item.label}</Link>

@@ -65,26 +65,31 @@ export default async function AuctionDetailPage({ params }: Props) {
   ].filter((r) => r.value);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
       {/* Breadcrumb */}
-      <nav className="text-xs text-gray-400 mb-4 flex items-center gap-1">
-        <a href="/" className="hover:text-[#2874F0]">Home</a>
+      <nav className="text-xs text-gray-400 mb-4 flex items-center gap-1 overflow-hidden">
+        <a href="/" className="hover:text-[#2874F0] shrink-0">Home</a>
         <span>/</span>
-        <a href="/auctions" className="hover:text-[#2874F0]">Auctions</a>
+        <a href="/auctions" className="hover:text-[#2874F0] shrink-0">Auctions</a>
         <span>/</span>
-        <span className="text-gray-600">{auction.title}</span>
+        <span className="text-gray-600 truncate">{auction.title}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: Images + Specs */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Images */}
+      {/*
+        Mobile layout order: images → title → bidding panel → specs → desc → seller → history
+        Desktop layout: left col (images, title, specs, desc, seller, history) | right col sticky (bidding panel)
+        Achieved by splitting left content into two divs and putting bidding panel between them.
+        grid-rows allows bidding panel to span both row slots on desktop.
+      */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8 gap-4">
+
+        {/* Row 1 Left: Images + Title */}
+        <div className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
             <ImageGallery images={auction.images} />
           </div>
 
-          {/* Title + badges */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
             <div className="flex flex-wrap gap-2 mb-3">
               <Badge variant={auction.status as any}>{auction.status.toUpperCase()}</Badge>
               <Badge variant={auction.condition as any}>{getConditionLabel(auction.condition)}</Badge>
@@ -94,14 +99,23 @@ export default async function AuctionDetailPage({ params }: Props) {
                 </Badge>
               )}
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">{auction.title}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{auction.title}</h1>
             <p className="text-gray-500">{auction.brand} {auction.model}</p>
             <p className="text-sm text-gray-400 mt-2">Listed: {formatDate(auction.createdAt)}</p>
           </div>
+        </div>
 
-          {/* Specs */}
+        {/* Right column: Bidding panel — on mobile shows here (after title, before specs); on desktop sticky right */}
+        <div className="lg:col-span-1 lg:row-span-2">
+          <div className="lg:sticky lg:top-20">
+            <BiddingPanel auction={auction} />
+          </div>
+        </div>
+
+        {/* Row 2 Left: Specs + Description + Seller + History */}
+        <div className="lg:col-span-2 space-y-4">
           {specRows.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
               <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Info size={16} className="text-[#2874F0]" /> Specifications
               </h2>
@@ -116,14 +130,12 @@ export default async function AuctionDetailPage({ params }: Props) {
             </div>
           )}
 
-          {/* Description */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
             <h2 className="font-bold text-gray-900 mb-3">Description</h2>
             <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{auction.description}</p>
           </div>
 
-          {/* Seller + shipping */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2"><Package size={15} /> Seller Info</h3>
               <p className="text-sm text-gray-600">{getSellerSourceLabel(auction.sellerSource)}</p>
@@ -141,19 +153,12 @@ export default async function AuctionDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Bid history */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
             <h2 className="font-bold text-gray-900 mb-4">Bid History</h2>
             <BidHistory bids={bids} />
           </div>
         </div>
 
-        {/* Right: Bidding panel */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-20">
-            <BiddingPanel auction={auction} />
-          </div>
-        </div>
       </div>
     </div>
   );

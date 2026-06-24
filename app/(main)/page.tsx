@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db/connect";
 import Auction from "@/lib/db/models/Auction";
 import { AuctionCard } from "@/components/auctions/AuctionCard";
 import { SkeletonGrid } from "@/components/shared/SkeletonCard";
-import { Zap, Clock, Package, ArrowRight, Shield, Award, CheckCircle, Truck, Smartphone, IndianRupee, RotateCcw } from "lucide-react";
+import { Zap, Clock, Package, ArrowRight, Shield, Award, CheckCircle, Truck, Smartphone, IndianRupee } from "lucide-react";
 import type { IAuction } from "@/types";
 
 async function getLiveAuctions(): Promise<IAuction[]> {
@@ -68,7 +68,7 @@ export default async function HomePage() {
     <div className="max-w-7xl mx-auto px-4">
 
       {/* Hero Banner */}
-      <section className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e3a5f] to-[#2874F0] text-white py-16 px-8 my-6">
+      <section className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e3a5f] to-[#2874F0] text-white py-10 sm:py-16 px-4 sm:px-8 my-4 sm:my-6">
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-6 right-32 w-72 h-72 rounded-full border-4 border-white" />
@@ -82,10 +82,10 @@ export default async function HomePage() {
             LAUNCH OFFER LIVE
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-3 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-3 tracking-tight">
             <span className="text-[#FFE500]">CASHBID</span>
           </h1>
-          <p className="text-xl sm:text-2xl font-bold text-white/90 mb-2">
+          <p className="text-lg sm:text-2xl font-bold text-white/90 mb-2">
             India's Hidden Mobile Auction Platform
           </p>
           <p className="text-blue-200 text-lg mb-6">Bid More. Pay Less.</p>
@@ -123,14 +123,14 @@ export default async function HomePage() {
       </section>
 
       {/* Launch Offer Banner */}
-      <div className="bg-gradient-to-r from-[#FFE500] to-yellow-400 rounded-2xl p-6 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+      <div className="bg-gradient-to-r from-[#FFE500] to-yellow-400 rounded-2xl p-4 sm:p-6 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 bg-[#2874F0] rounded-xl flex items-center justify-center shrink-0">
             <IndianRupee size={28} className="text-[#FFE500]" />
           </div>
           <div>
             <p className="text-xs font-bold text-[#2874F0] uppercase tracking-wide mb-0.5">Launch Offer</p>
-            <h3 className="text-2xl font-black text-[#0f172a]">Add ₹500 Wallet & Start Bidding</h3>
+            <h3 className="text-xl sm:text-2xl font-black text-[#0f172a]">Add ₹500 Wallet & Start Bidding</h3>
             <p className="text-sm text-gray-700 mt-0.5">Top up your wallet and place bids instantly. Each bid costs just ₹100.</p>
           </div>
         </div>
@@ -176,7 +176,7 @@ export default async function HomePage() {
       {/* Category quick links */}
       <div className="grid grid-cols-2 gap-3 my-6">
         {[
-          { href: "/auctions?condition=refurbished", label: "Refurbished Phones", icon: RotateCcw, bg: "bg-green-50",  iconColor: "text-green-600"  },
+          { href: "/auctions?condition=refurbished", label: "Refurbished Phones", icon: Smartphone, bg: "bg-green-50",  iconColor: "text-green-600"  },
           { href: "/auctions?category=bulk",         label: "Bulk Lots",          icon: Package,   bg: "bg-orange-50", iconColor: "text-orange-500" },
         ].map(({ href, label, icon: Icon, bg, iconColor }) => (
           <Link key={href} href={href} className={`${bg} rounded-xl p-5 flex items-center gap-4 hover:shadow-md transition-shadow group`}>
@@ -200,9 +200,9 @@ export default async function HomePage() {
       </Suspense>
 
       {/* Flipkart Liquidation CTA */}
-      <div className="bg-[#FFE500] rounded-2xl p-8 my-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-[#FFE500] rounded-2xl p-5 sm:p-8 my-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <h3 className="text-2xl font-bold text-[#2874F0]">Flipkart Liquidation Stock</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-[#2874F0]">Flipkart Liquidation Stock</h3>
           <p className="text-gray-700 mt-1">Bulk lots of verified devices at wholesale prices</p>
         </div>
         <Link

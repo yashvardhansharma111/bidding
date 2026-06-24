@@ -1,7 +1,7 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
 
 interface AuctionFiltersPanelProps {
   currentFilters: Record<string, string>;
@@ -20,6 +20,7 @@ export function AuctionFiltersPanel({ currentFilters }: AuctionFiltersPanelProps
   const router   = useRouter();
   const pathname = usePathname();
   const [local, setLocal] = useState(currentFilters);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const apply = (updates: Record<string, string>) => {
     const merged = { ...local, ...updates };
@@ -40,9 +41,29 @@ export function AuctionFiltersPanel({ currentFilters }: AuctionFiltersPanelProps
 
   const hasFilters = Object.values(local).some(Boolean);
 
+  const activeFilterCount = Object.values(local).filter(Boolean).length;
+
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-5">
-      <div className="flex items-center justify-between">
+    <div>
+      {/* Mobile toggle */}
+      <button
+        className="lg:hidden w-full flex items-center justify-between bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 mb-3"
+        onClick={() => setMobileOpen(!mobileOpen)}
+      >
+        <div className="flex items-center gap-2 font-semibold text-gray-900 text-sm">
+          <SlidersHorizontal size={15} />
+          Filters
+          {activeFilterCount > 0 && (
+            <span className="bg-[#2874F0] text-white text-xs font-bold rounded-full px-1.5 py-0.5 leading-none">
+              {activeFilterCount}
+            </span>
+          )}
+        </div>
+        <ChevronDown size={16} className={`text-gray-500 transition-transform ${mobileOpen ? "rotate-180" : ""}`} />
+      </button>
+
+    <div className={`bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-5 ${!mobileOpen ? "hidden lg:block" : ""}`}>
+      <div className="hidden lg:flex items-center justify-between">
         <div className="flex items-center gap-2 font-semibold text-gray-900">
           <SlidersHorizontal size={16} />
           Filters
@@ -53,6 +74,14 @@ export function AuctionFiltersPanel({ currentFilters }: AuctionFiltersPanelProps
           </button>
         )}
       </div>
+      {/* Mobile clear button */}
+      {hasFilters && (
+        <div className="lg:hidden flex justify-end">
+          <button onClick={clear} className="text-xs text-red-500 hover:text-red-600 flex items-center gap-1">
+            <X size={12} /> Clear all
+          </button>
+        </div>
+      )}
 
       {/* Status */}
       <div>
@@ -140,6 +169,7 @@ export function AuctionFiltersPanel({ currentFilters }: AuctionFiltersPanelProps
           />
         </div>
       </div>
+    </div>
     </div>
   );
 }

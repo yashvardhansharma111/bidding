@@ -81,58 +81,58 @@ export default function OrdersPage() {
             const Icon = config.icon;
             const needsPayment = order.status === "won" || order.status === "pending_payment";
             return (
-              <div key={order._id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-                <div className="flex gap-4 items-start">
-                  <div className="w-20 h-20 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
+              <div key={order._id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
+                <div className="flex gap-3 sm:gap-4 items-start">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
                     {order.auction.images?.[0] ? (
                       <img src={order.auction.images[0]} alt={order.auction.title} className="w-full h-full object-contain rounded-lg p-1" />
                     ) : (
-                      <Package size={28} className="text-gray-300" />
+                      <Package size={24} className="text-gray-300" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 line-clamp-1">{order.auction.title}</h3>
-                    <p className="text-sm text-gray-400">{order.auction.brand} {order.auction.model}</p>
-                    <div className="flex flex-wrap items-center gap-3 mt-2">
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5 ${config.color}`}>
-                        <Icon size={12} /> {config.label}
-                      </span>
-                      <span className="text-sm text-gray-500">Ordered {formatDate(order.createdAt)}</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-semibold text-gray-900 line-clamp-2 text-sm sm:text-base">{order.auction.title}</h3>
+                      <p className="text-base sm:text-lg font-bold text-gray-900 shrink-0">{formatCurrency(order.totalAmount)}</p>
                     </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-lg font-bold text-gray-900">{formatCurrency(order.totalAmount)}</p>
+                    <p className="text-xs sm:text-sm text-gray-400">{order.auction.brand} {order.auction.model}</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1 ${config.color}`}>
+                        <Icon size={11} /> {config.label}
+                      </span>
+                      <span className="text-xs text-gray-400">{formatDate(order.createdAt)}</span>
+                    </div>
                     {order.deliveryCharges > 0 && (
-                      <p className="text-xs text-gray-400">+{formatCurrency(order.deliveryCharges)} delivery</p>
+                      <p className="text-xs text-gray-400 mt-1">+{formatCurrency(order.deliveryCharges)} delivery</p>
                     )}
                   </div>
                 </div>
                 {needsPayment && (
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+                  <div className="mt-3 pt-3 border-t border-gray-100">
                     <Link
                       href={`/payment/${order._id}`}
-                      className="flex items-center gap-2 bg-[#2874F0] text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors"
+                      className="flex items-center justify-center gap-2 bg-[#2874F0] text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors w-full sm:w-auto sm:float-right"
                     >
-                      <CreditCard size={15} /> Pay Now — {formatCurrency(order.totalAmount)} <ArrowRight size={14} />
+                      <CreditCard size={15} /> Pay Now — {formatCurrency(order.totalAmount)}
                     </Link>
                   </div>
                 )}
                 {(order.status === "shipped" || order.status === "delivered") && order.awbCode && (
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Truck size={15} className="text-purple-500" />
+                  <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                      <Truck size={14} className="text-purple-500" />
                       <span className="font-medium">{order.courierName}</span>
-                      <span className="text-gray-400">·</span>
-                      <span className="text-gray-500">AWB: {order.awbCode}</span>
+                      <span className="text-gray-400 hidden sm:inline">·</span>
+                      <span className="text-gray-500 text-xs">AWB: {order.awbCode}</span>
                     </div>
                     {order.trackingUrl && (
                       <a
                         href={order.trackingUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-200 px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-purple-100 transition-colors"
+                        className="flex items-center justify-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-200 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-purple-100 transition-colors"
                       >
-                        <Truck size={13} /> Track Package <ArrowRight size={13} />
+                        <Truck size={13} /> Track Package
                       </a>
                     )}
                   </div>

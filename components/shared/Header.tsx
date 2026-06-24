@@ -172,8 +172,6 @@ export function Header() {
             { href: "/auctions?status=upcoming", label: "Upcoming" },
             { href: "/auctions?category=bulk", label: "Bulk Lots" },
             { href: "/auctions?condition=refurbished", label: "Refurbished" },
-            { href: "/auctions?brand=Apple", label: "iPhone" },
-            { href: "/auctions?brand=Samsung", label: "Samsung" },
           ].map((item) => (
             <Link
               key={item.href}
@@ -195,21 +193,44 @@ export function Header() {
             exit={{ height: 0 }}
             className="sm:hidden overflow-hidden bg-[#1a5dcf]"
           >
-            <nav className="px-4 py-2 flex flex-col gap-1">
+            <nav className="px-4 py-2 flex flex-col gap-0.5">
               {[
-                { href: "/auctions?status=live", label: "Live Auctions" },
-                { href: "/auctions?status=upcoming", label: "Upcoming" },
-                { href: "/dashboard/watchlist", label: "Watchlist" },
+                { href: "/auctions?status=live",     label: "Live Auctions" },
+                { href: "/auctions?status=upcoming", label: "Upcoming"      },
+                { href: "/auctions?category=bulk",   label: "Bulk Lots"     },
+                { href: "/auctions?condition=refurbished", label: "Refurbished" },
               ].map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className="text-white py-2 text-sm font-medium"
+                  className="text-white py-2.5 text-sm font-medium border-b border-white/10 last:border-0"
                 >
                   {item.label}
                 </Link>
               ))}
+              {isAuthenticated && user && (
+                <>
+                  <div className="pt-1 pb-0.5">
+                    <p className="text-white/50 text-xs uppercase tracking-wide font-semibold py-1">My Account</p>
+                  </div>
+                  {[
+                    { href: "/dashboard/wallet",        label: `Wallet · ${Math.floor((user.walletBalance ?? 0) / 100)} bids` },
+                    { href: "/dashboard/watchlist",     label: "Watchlist"   },
+                    { href: "/dashboard/bids",          label: "My Bids"     },
+                    { href: "/dashboard/notifications", label: "Notifications" },
+                  ].map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="text-white/90 py-2.5 text-sm font-medium border-b border-white/10 last:border-0"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </>
+              )}
             </nav>
           </motion.div>
         )}
