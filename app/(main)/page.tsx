@@ -65,7 +65,7 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4">
 
       {/* Hero Banner */}
       <section className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e3a5f] to-[#2874F0] text-white py-10 sm:py-16 px-4 sm:px-8 my-4 sm:my-6">
