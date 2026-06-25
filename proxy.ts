@@ -19,13 +19,23 @@ export async function proxy(req: NextRequest) {
 
   const token = req.cookies.get("cashbid_token")?.value;
 
-  // Admin pages: require admin role
+  // Admin pages: only verify token is valid — role check is done by admin API routes (requireAdmin)
+  // and client-side layout. Checking role in JWT here causes issues when role is updated in DB
+  // but the old JWT cookie hasn't been refreshed yet (user didn't re-login after role change).
   if (ADMIN_PATHS.some((p) => pathname.startsWith(p)) && !pathname.startsWith("/api")) {
-    if (!token) return NextResponse.redirect(new URL("/login", req.url));
+    console.log(`[proxy] Admin route hit: ${pathname}`);
+    console.log(`[proxy] Token present: ${!!token}`);
+
+    if (!token) {
+      console.log(`[proxy] No token → redirecting to /login`);
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
     try {
       const payload = await verifyJWT(token);
-      if (payload.role !== "admin") return NextResponse.redirect(new URL("/", req.url));
-    } catch {
+      console.log(`[proxy] JWT valid — userId: ${payload.userId} | email: ${payload.email} | JWT role: "${payload.role}" (actual role checked by layout via /api/auth/me)`);
+      // Note: role check happens client-side (admin layout) and in each admin API route (requireAdmin)
+    } catch (err) {
+      console.error(`[proxy] JWT verify failed:`, err);
       return NextResponse.redirect(new URL("/login", req.url));
     }
   }

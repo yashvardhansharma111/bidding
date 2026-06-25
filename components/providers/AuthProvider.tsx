@@ -10,8 +10,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     axios
       .get("/api/auth/me")
-      .then(({ data }) => setUser(data.data.user))
-      .catch(() => setUser(null));
+      .then(({ data }) => {
+        const user = data.data.user;
+        console.log("[AuthProvider] /api/auth/me response — role:", user?.role, "| email:", user?.email);
+        setUser(user);
+      })
+      .catch((err) => {
+        console.log("[AuthProvider] /api/auth/me failed:", err?.response?.status, err?.response?.data?.error);
+        setUser(null);
+      });
   }, [setUser, setLoading]);
 
   return <>{children}</>;

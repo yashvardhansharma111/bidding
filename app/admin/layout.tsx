@@ -22,8 +22,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || user?.role !== "admin")) {
-      router.push("/login");
+    console.log("[admin layout] isLoading:", isLoading, "| isAuthenticated:", isAuthenticated, "| role:", user?.role, "| email:", user?.email);
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        console.log("[admin layout] Not authenticated → redirecting to /login");
+        router.push("/login");
+      } else if (user?.role !== "admin") {
+        console.log("[admin layout] Role is not admin (got:", user?.role, ") → redirecting to /login");
+        router.push("/login");
+      } else {
+        console.log("[admin layout] Access granted for admin:", user?.email);
+      }
     }
   }, [isAuthenticated, user, isLoading, router]);
 
