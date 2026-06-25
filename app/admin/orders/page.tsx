@@ -185,10 +185,10 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Orders</h1>
           <p className="text-sm text-gray-500 mt-0.5">Manage auction orders and shipments</p>
         </div>
         <button
@@ -293,7 +293,7 @@ export default function AdminOrdersPage() {
                   </div>
 
                   {/* Amount + actions */}
-                  <div className="flex flex-col items-end gap-2 shrink-0">
+                  <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-start mt-2 sm:mt-0">
                     <p className="text-base font-bold text-gray-900">
                       {formatCurrency(order.totalAmount)}
                     </p>

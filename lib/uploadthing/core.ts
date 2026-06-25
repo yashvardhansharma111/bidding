@@ -8,7 +8,7 @@ export const ourFileRouter = {
   auctionImages: f({ image: { maxFileSize: "4MB", maxFileCount: 8 } })
     .middleware(async () => {
       const cookieStore = await cookies();
-      const token = cookieStore.get("bidkart_token")?.value;
+      const token = cookieStore.get("cashbid_token")?.value;
       if (!token) throw new Error("Unauthorized");
       const payload = verifyToken(token);
       if (payload.role !== "admin") throw new Error("Forbidden");

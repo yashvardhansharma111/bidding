@@ -54,10 +54,10 @@ export default function AdminWithdrawalsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="p-4 sm:p-8 space-y-6">
+      <div className="flex flex-wrap items-center gap-3">
         <Send size={22} className="text-[#2874F0]" />
-        <h1 className="text-2xl font-bold text-gray-900">Withdrawal Requests</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Withdrawal Requests</h1>
         {pending.length > 0 && (
           <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">{pending.length} pending</span>
         )}
@@ -76,12 +76,12 @@ export default function AdminWithdrawalsPage() {
         ) : (
           <div className="divide-y divide-gray-50">
             {pending.map((w) => (
-              <div key={w._id} className="flex items-center gap-4 px-4 py-4">
+              <div key={w._id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-4">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900">{w.user?.name}</p>
                   <p className="text-sm text-gray-500">{w.user?.email}</p>
                   <p className="text-sm text-gray-700 mt-1">
-                    <span className="font-bold text-green-600">{fmt(w.amount)}</span> → <span className="font-mono text-gray-600">{w.upiId}</span>
+                    <span className="font-bold text-green-600">{fmt(w.amount)}</span> → <span className="font-mono text-gray-600 break-all">{w.upiId}</span>
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">{fmtDate(w.createdAt)}</p>
                 </div>
@@ -89,14 +89,14 @@ export default function AdminWithdrawalsPage() {
                   <button
                     onClick={() => setNoteModal({ id: w._id, action: "approve" })}
                     disabled={actionLoading !== null}
-                    className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
                   >
                     <CheckCircle size={15} /> Approve
                   </button>
                   <button
                     onClick={() => setNoteModal({ id: w._id, action: "reject" })}
                     disabled={actionLoading !== null}
-                    className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
                   >
                     <XCircle size={15} /> Reject
                   </button>

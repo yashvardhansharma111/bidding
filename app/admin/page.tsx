@@ -43,28 +43,28 @@ export default function AdminDashboard() {
     : [];
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard Overview</h1>
           <p className="text-gray-500 text-sm mt-0.5">Welcome back, Admin</p>
         </div>
         <Link
           href="/admin/auctions/new"
-          className="flex items-center gap-2 bg-[#2874F0] text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-[#2874F0] text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
         >
           <Plus size={17} /> New Auction
         </Link>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="h-28 bg-gray-200 rounded-xl animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {stats.map(({ icon: Icon, label, value, sub, color }, i) => (
             <motion.div
               key={label}
@@ -85,8 +85,8 @@ export default function AdminDashboard() {
       )}
 
       {/* Recent Auctions */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100">
           <h2 className="font-bold text-gray-900">Recent Auctions</h2>
           <Link href="/admin/auctions" className="text-sm text-[#2874F0] hover:underline flex items-center gap-1">
             View all <ExternalLink size={13} />
@@ -95,18 +95,18 @@ export default function AdminDashboard() {
         <div className="divide-y divide-gray-50">
           {loading
             ? Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="px-6 py-4 flex items-center justify-between animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-48" />
-                  <div className="h-4 bg-gray-200 rounded w-20" />
+                <div key={i} className="px-4 sm:px-6 py-4 flex items-center justify-between animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-36 sm:w-48" />
+                  <div className="h-4 bg-gray-200 rounded w-16 sm:w-20" />
                 </div>
               ))
             : data?.recentAuctions.map((a) => (
-                <div key={a._id} className="px-6 py-3.5 flex items-center justify-between hover:bg-gray-50">
-                  <div>
-                    <p className="font-medium text-gray-900 text-sm">{a.title}</p>
+                <div key={a._id} className="px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-2 hover:bg-gray-50">
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-sm line-clamp-1">{a.title}</p>
                     <p className="text-xs text-gray-400">{a.brand}</p>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                     <span className="text-sm font-semibold text-[#2874F0]">{formatCurrency(a.currentBid)}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       a.status === "live" ? "bg-green-100 text-green-700" :

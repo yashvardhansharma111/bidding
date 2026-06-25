@@ -58,10 +58,10 @@ export default function AdminBidsPage() {
   );
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">All Bids</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">All Bids</h1>
           <p className="text-gray-500 text-sm">{total} total bids</p>
         </div>
       </div>

@@ -71,13 +71,13 @@ export default function AdminAuctionsPage() {
   };
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Auctions</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Auctions</h1>
           <p className="text-gray-500 text-sm">{total} total auctions</p>
         </div>
-        <Link href="/admin/auctions/new" className="flex items-center gap-2 bg-[#2874F0] text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
+        <Link href="/admin/auctions/new" className="flex items-center gap-2 bg-[#2874F0] text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 text-sm">
           <Plus size={17} /> New Auction
         </Link>
       </div>

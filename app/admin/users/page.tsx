@@ -80,10 +80,10 @@ export default function AdminUsersPage() {
   const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Users</h1>
           <p className="text-gray-500 text-sm">{total} registered users</p>
         </div>
       </div>
