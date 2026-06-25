@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@/store/authStore";
@@ -37,9 +38,8 @@ export default function PaymentPage() {
 
   useEffect(() => {
     if (!isAuthenticated) { router.push("/login"); return; }
-    axios.get(`/api/user/dashboard`).then(({ data }) => {
-      const found = data.data.orders?.find((o: any) => o._id === orderId);
-      if (found) setOrder(found);
+    axios.get(`/api/user/orders/${orderId}`).then(({ data }) => {
+      if (data.data) setOrder(data.data);
     }).finally(() => setLoading(false));
   }, [orderId, isAuthenticated, router]);
 
@@ -97,7 +97,9 @@ export default function PaymentPage() {
         <h2 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide text-gray-500">Order Summary</h2>
         <div className="flex gap-4 items-center">
           {order.auction.images?.[0] && (
-            <img src={order.auction.images[0]} alt={order.auction.title} className="w-16 h-16 object-contain rounded-lg bg-gray-50 border border-gray-100 p-1 shrink-0" />
+            <div className="relative w-16 h-16 shrink-0 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden">
+              <Image src={order.auction.images[0]} alt={order.auction.title} fill sizes="64px" className="object-contain p-1" />
+            </div>
           )}
           <div>
             <p className="font-semibold text-gray-900">{order.auction.title}</p>

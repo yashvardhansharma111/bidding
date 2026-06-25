@@ -1,71 +1,51 @@
-"use client";
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { useAuthStore } from "@/store/authStore";
+import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/getCurrentUser";
+import { connectDB } from "@/lib/db/connect";
+import Bid from "@/lib/db/models/Bid";
+import Order from "@/lib/db/models/Order";
+import Watchlist from "@/lib/db/models/Watchlist";
+import Notification from "@/lib/db/models/Notification";
 import { Gavel, Trophy, Heart, Package, Bell } from "lucide-react";
-import { formatCurrency } from "@/lib/utils/formatters";
-import axios from "axios";
-import { useRouter } from "next/navigation";
 
-export default function DashboardPage() {
-  const { user, isAuthenticated } = useAuthStore();
-  const router = useRouter();
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+export default async function DashboardPage() {
+  const user = await requireAuth().catch(() => null);
+  if (!user) redirect("/login");
 
-  useEffect(() => {
-    if (!isAuthenticated) { router.push("/login"); return; }
-    axios.get("/api/user/dashboard").then(({ data }) => {
-      setData(data.data);
-    }).finally(() => setLoading(false));
-  }, [isAuthenticated, router]);
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-48" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded-xl" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  await connectDB();
+  const [activeBids, wonOrders, watchlistCount, unreadNotifications] = await Promise.all([
+    Bid.countDocuments({ bidder: user._id }),
+    Order.countDocuments({ winner: user._id, status: { $ne: "cancelled" } }),
+    Watchlist.countDocuments({ user: user._id }),
+    Notification.countDocuments({ user: user._id, isRead: false }),
+  ]);
 
   const stats = [
-    { icon: Gavel, label: "Active Bids", value: data?.activeBids?.length || 0, href: "/dashboard/bids", color: "text-[#2874F0] bg-blue-50" },
-    { icon: Trophy, label: "Won Auctions", value: data?.orders?.filter((o: any) => o.status !== "cancelled").length || 0, href: "/dashboard/orders", color: "text-yellow-600 bg-yellow-50" },
-    { icon: Heart, label: "Watchlist", value: data?.watchlist?.length || 0, href: "/dashboard/watchlist", color: "text-red-500 bg-red-50" },
-    { icon: Bell, label: "Unread", value: data?.unreadNotifications || 0, href: "/dashboard/notifications", color: "text-purple-600 bg-purple-50" },
+    { icon: Gavel,   label: "Active Bids",   value: activeBids,           href: "/dashboard/bids",          color: "text-[#2874F0] bg-blue-50"   },
+    { icon: Trophy,  label: "Won Auctions",   value: wonOrders,            href: "/dashboard/orders",        color: "text-yellow-600 bg-yellow-50" },
+    { icon: Heart,   label: "Watchlist",      value: watchlistCount,       href: "/dashboard/watchlist",     color: "text-red-500 bg-red-50"       },
+    { icon: Bell,    label: "Unread",         value: unreadNotifications,  href: "/dashboard/notifications", color: "text-purple-600 bg-purple-50" },
   ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">My Dashboard</h1>
-        <p className="text-gray-500">Welcome back, {user?.name}!</p>
+        <p className="text-gray-500">Welcome back, {user.name}!</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {stats.map(({ icon: Icon, label, value, href, color }, i) => (
-          <motion.div key={label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-            <Link href={href} className="block bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${color}`}>
-                <Icon size={20} />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">{value}</p>
-              <p className="text-sm text-gray-500">{label}</p>
-            </Link>
-          </motion.div>
+        {stats.map(({ icon: Icon, label, value, href, color }) => (
+          <Link key={label} href={href} className="block bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${color}`}>
+              <Icon size={20} />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{value}</p>
+            <p className="text-sm text-gray-500">{label}</p>
+          </Link>
         ))}
       </div>
 
-      {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link href="/auctions?status=live" className="bg-[#2874F0] text-white rounded-xl p-5 hover:bg-blue-700 transition-colors">
           <Gavel size={24} className="mb-2" />
