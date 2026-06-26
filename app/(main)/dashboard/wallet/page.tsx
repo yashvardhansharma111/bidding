@@ -36,9 +36,10 @@ const TX_ICONS: Record<string, { icon: typeof Wallet; color: string; sign: strin
 };
 
 const TOPUP_OPTIONS = [
-  { amount: 100,  bids: 1,  label: "₹100",  sublabel: "1 Bid",   popular: false },
-  { amount: 500,  bids: 5,  label: "₹500",  sublabel: "5 Bids",  popular: true  },
-  { amount: 1000, bids: 10, label: "₹1000", sublabel: "10 Bids", popular: false },
+  { amount: 1,    bids: 0,  label: "₹1",    sublabel: "Test",    popular: false, test: true  },
+  { amount: 100,  bids: 1,  label: "₹100",  sublabel: "1 Bid",   popular: false, test: false },
+  { amount: 500,  bids: 5,  label: "₹500",  sublabel: "5 Bids",  popular: true,  test: false },
+  { amount: 1000, bids: 10, label: "₹1000", sublabel: "10 Bids", popular: false, test: false },
 ];
 
 declare global {
@@ -76,10 +77,33 @@ export default function WalletPage() {
   useEffect(() => { load(); }, [load]);
 
   const handleTopup = async (amount: number) => {
+    console.log("[topup] Starting top-up for amount:", amount);
     setTopupLoading(true);
     try {
+      // Check Razorpay script loaded
+      if (typeof window.Razorpay === "undefined") {
+        console.error("[topup] window.Razorpay is undefined — script not loaded yet");
+        alert("Payment SDK not loaded. Please refresh and try again.");
+        return;
+      }
+
+      console.log("[topup] Calling /api/wallet/topup...");
       const { data } = await axios.post("/api/wallet/topup", { amount });
+      console.log("[topup] API response:", data);
+
       const { orderId, keyId } = data.data;
+      console.log("[topup] Razorpay orderId:", orderId, "| keyId:", keyId ? `${keyId.slice(0, 8)}...` : "MISSING");
+
+      if (!orderId) {
+        console.error("[topup] orderId missing in API response");
+        alert("Payment order creation failed. Check server logs.");
+        return;
+      }
+      if (!keyId) {
+        console.error("[topup] RAZORPAY_KEY_ID missing — check .env.local");
+        alert("Payment config missing. Contact support.");
+        return;
+      }
 
       const rzp = new window.Razorpay({
         key: keyId,
@@ -89,19 +113,36 @@ export default function WalletPage() {
         description: "Wallet Top-up",
         order_id: orderId,
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
-          await axios.post("/api/wallet/topup/verify", {
-            razorpayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-            amount,
-          });
-          await Promise.all([load(), refreshUser()]);
+          console.log("[topup] Payment success, verifying:", response.razorpay_payment_id);
+          try {
+            const verifyRes = await axios.post("/api/wallet/topup/verify", {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              amount,
+            });
+            console.log("[topup] Verify response:", verifyRes.data);
+            await Promise.all([load(), refreshUser()]);
+          } catch (verifyErr: any) {
+            console.error("[topup] Verify failed:", verifyErr?.response?.data ?? verifyErr);
+            alert("Payment received but verification failed. Contact support with payment ID: " + response.razorpay_payment_id);
+          }
+        },
+        modal: {
+          ondismiss: () => console.log("[topup] Razorpay modal dismissed by user"),
         },
         theme: { color: "#2874F0" },
       });
       rzp.open();
-    } catch {
-      alert("Failed to initiate payment. Try again.");
+    } catch (err: any) {
+      const msg = err?.response?.data?.error ?? err?.message ?? "Unknown error";
+      const status = err?.response?.status;
+      console.error("[topup] Error initiating payment:", {
+        status,
+        message: msg,
+        fullError: err?.response?.data ?? err,
+      });
+      alert(`Failed to initiate payment: ${msg}${status ? ` (${status})` : ""}`);
     } finally {
       setTopupLoading(false);
     }
@@ -170,8 +211,8 @@ export default function WalletPage() {
             <Plus size={18} className="text-[#2874F0]" />
             <h2 className="font-bold text-gray-900">Top Up Wallet</h2>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            {TOPUP_OPTIONS.map(({ amount, bids, label, sublabel, popular }) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {TOPUP_OPTIONS.map(({ amount, label, sublabel, popular, test }) => (
               <button
                 key={amount}
                 onClick={() => handleTopup(amount)}
@@ -179,6 +220,8 @@ export default function WalletPage() {
                 className={`relative flex flex-col items-center justify-center rounded-xl border-2 py-3 sm:py-4 px-2 sm:px-3 transition-all hover:shadow-md disabled:opacity-60 ${
                   popular
                     ? "border-[#2874F0] bg-blue-50"
+                    : test
+                    ? "border-dashed border-gray-300 bg-gray-50 hover:border-gray-400"
                     : "border-gray-200 bg-white hover:border-[#2874F0]"
                 }`}
               >
@@ -187,9 +230,14 @@ export default function WalletPage() {
                     POPULAR
                   </span>
                 )}
-                <span className="text-xl font-black text-gray-900">{label}</span>
-                <span className="text-sm font-semibold text-[#2874F0] mt-0.5">{sublabel}</span>
-                <span className="text-xs text-gray-400 mt-1">₹100 each</span>
+                {test && (
+                  <span className="absolute -top-2.5 bg-gray-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    TEST
+                  </span>
+                )}
+                <span className={`text-xl font-black ${test ? "text-gray-500" : "text-gray-900"}`}>{label}</span>
+                <span className={`text-sm font-semibold mt-0.5 ${test ? "text-gray-400" : "text-[#2874F0]"}`}>{sublabel}</span>
+                {!test && <span className="text-xs text-gray-400 mt-1">₹100 each</span>}
               </button>
             ))}
           </div>

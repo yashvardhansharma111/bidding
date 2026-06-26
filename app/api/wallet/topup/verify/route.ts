@@ -15,15 +15,27 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  console.log("[wallet/topup/verify] Request received");
   try {
     const user = await requireAuth();
+    console.log("[wallet/topup/verify] Auth OK — userId:", user._id.toString());
+
     const body = await req.json();
+    console.log("[wallet/topup/verify] Payload:", { ...body, razorpaySignature: "***" });
+
     const parsed = schema.safeParse(body);
-    if (!parsed.success) return apiError("Invalid payload", 400);
+    if (!parsed.success) {
+      console.error("[wallet/topup/verify] Validation failed:", parsed.error.issues);
+      return apiError("Invalid payload", 400);
+    }
 
     const { razorpayOrderId, razorpayPaymentId, razorpaySignature, amount } = parsed.data;
 
+    const keySecretPresent = !!process.env.RAZORPAY_KEY_SECRET;
+    console.log("[wallet/topup/verify] RAZORPAY_KEY_SECRET present:", keySecretPresent);
+
     const isValid = verifyPaymentSignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
+    console.log("[wallet/topup/verify] Signature valid:", isValid);
     if (!isValid) return apiError("Payment verification failed", 400);
 
     await connectDB();
@@ -43,10 +55,11 @@ export async function POST(req: NextRequest) {
       ref: razorpayPaymentId,
     });
 
+    console.log("[wallet/topup/verify] Wallet updated — new balance:", updated?.walletBalance);
     return apiSuccess({ newBalance: updated?.walletBalance ?? 0 }, "Wallet topped up successfully");
   } catch (err) {
-    console.error("[wallet topup verify]", err);
+    console.error("[wallet/topup/verify] ERROR:", err);
     if ((err as Error).message === "Unauthorized") return apiError("Unauthorized", 401);
-    return apiError("Internal server error", 500);
+    return apiError((err as Error).message || "Internal server error", 500);
   }
 }
