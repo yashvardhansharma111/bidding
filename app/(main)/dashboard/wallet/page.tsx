@@ -2,8 +2,18 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Wallet, ArrowDownCircle, ArrowUpCircle, Clock, Plus, Gift, Send } from "lucide-react";
-import Script from "next/script";
 import { useAuth } from "@/hooks/useAuth";
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window.Razorpay !== "undefined") { resolve(true); return; }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => { console.log("[razorpay] Script loaded"); resolve(true); };
+    script.onerror = () => { console.error("[razorpay] Script failed to load"); resolve(false); };
+    document.body.appendChild(script);
+  });
+}
 
 interface Transaction {
   _id: string;
@@ -80,12 +90,14 @@ export default function WalletPage() {
     console.log("[topup] Starting top-up for amount:", amount);
     setTopupLoading(true);
     try {
-      // Check Razorpay script loaded
-      if (typeof window.Razorpay === "undefined") {
-        console.error("[topup] window.Razorpay is undefined — script not loaded yet");
-        alert("Payment SDK not loaded. Please refresh and try again.");
+      // Dynamically load Razorpay if not already loaded
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        console.error("[topup] Razorpay script failed to load");
+        alert("Payment SDK failed to load. Check your internet connection and try again.");
         return;
       }
+      console.log("[topup] Razorpay SDK ready");
 
       console.log("[topup] Calling /api/wallet/topup...");
       const { data } = await axios.post("/api/wallet/topup", { amount });
@@ -137,12 +149,9 @@ export default function WalletPage() {
     } catch (err: any) {
       const msg = err?.response?.data?.error ?? err?.message ?? "Unknown error";
       const status = err?.response?.status;
-      console.error("[topup] Error initiating payment:", {
-        status,
-        message: msg,
-        fullError: err?.response?.data ?? err,
-      });
-      alert(`Failed to initiate payment: ${msg}${status ? ` (${status})` : ""}`);
+      console.error("[topup] Error initiating payment — status:", status, "| message:", msg);
+      console.error("[topup] Full error response:", JSON.stringify(err?.response?.data ?? {}, null, 2));
+      alert(`Payment failed: ${msg}${status ? ` (HTTP ${status})` : ""}\n\nCheck browser console + server logs for details.`);
     } finally {
       setTopupLoading(false);
     }
@@ -179,8 +188,6 @@ export default function WalletPage() {
 
   return (
     <>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-
       <div className="space-y-6">
         {/* Balance cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
