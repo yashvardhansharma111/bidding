@@ -40,10 +40,10 @@ export async function POST(req: NextRequest) {
     await connectDB();
     console.log("[wallet/topup] DB connected, creating Razorpay order for ₹", parsed.data.amount);
 
-    const order = await createOrder(
-      parsed.data.amount * 100,
-      `topup_${user._id}_${Date.now()}`
-    );
+    // Receipt max 40 chars — use last 8 chars of userId + epoch seconds
+    const receipt = `tp_${user._id.toString().slice(-8)}_${Math.floor(Date.now() / 1000)}`;
+    console.log("[wallet/topup] Receipt ID:", receipt, "length:", receipt.length);
+    const order = await createOrder(parsed.data.amount * 100, receipt);
     console.log("[wallet/topup] Razorpay order created:", order.id, "| status:", order.status);
 
     return apiSuccess({
