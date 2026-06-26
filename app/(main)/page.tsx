@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db/connect";
 import Auction from "@/lib/db/models/Auction";
 import { AuctionCard } from "@/components/auctions/AuctionCard";
 import { SkeletonGrid } from "@/components/shared/SkeletonCard";
-import { Zap, Clock, Package, ArrowRight, Shield, Award, CheckCircle, Truck, Smartphone, IndianRupee } from "lucide-react";
+import { Zap, Clock, Package, ArrowRight, Shield, Award, CheckCircle, Truck, Smartphone, IndianRupee, MapPin, X, AlertCircle, Headphones, Video } from "lucide-react";
 import type { IAuction } from "@/types";
 
 async function getLiveAuctions(): Promise<IAuction[]> {
@@ -228,40 +228,169 @@ export default async function HomePage() {
       </Suspense>
 
       {/* Why CashBid */}
-      <section className="py-12 border-t border-gray-100 mt-8">
-        <h2 className="text-xl font-bold text-center text-gray-900 mb-8">Why CashBid?</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {/* Verified Devices with quality check list */}
-          <div className="p-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
+      <section className="py-10 border-t border-gray-100 mt-8">
+        {/* Heading */}
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-black text-gray-900">Why CashBid?</h2>
+          <p className="text-sm text-gray-500 mt-1">We make sure you get the best quality phones<br />with complete peace of mind.</p>
+        </div>
+
+        {/* Verified Devices */}
+        <div className="bg-white rounded-2xl border-2 border-blue-100 p-5 mb-4 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
               <Smartphone size={24} className="text-[#2874F0]" />
             </div>
-            <h3 className="font-bold text-gray-900 mb-2">Verified Devices</h3>
-            <p className="text-sm text-gray-500 mb-3">Every phone passes our 10-point quality check before listing:</p>
-            <ul className="text-xs text-gray-500 space-y-1">
-              {["IMEI Verified", "Display Tested", "Touch Tested", "Camera Tested", "Speaker Tested", "Mic Tested", "Charging Tested", "Battery Checked", "Network Tested", "Buttons Tested"].map((pt) => (
-                <li key={pt} className="flex items-center gap-1.5">
-                  <CheckCircle size={11} className="text-green-500 shrink-0" />
-                  {pt}
-                </li>
-              ))}
-            </ul>
+            <div>
+              <h3 className="font-bold text-gray-900">Verified Devices</h3>
+              <p className="text-xs text-gray-500">Every phone passes our 10-point quality check before listing.</p>
+            </div>
           </div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+            {[
+              ["IMEI Verified", "Mic Tested"],
+              ["Display Tested", "Charging Tested"],
+              ["Touch Tested", "Battery Checked"],
+              ["Camera Tested", "Network Tested"],
+              ["Speaker Tested", "Buttons Tested"],
+            ].map(([left, right]) => (
+              <div key={left} className="contents">
+                <div className="flex items-center gap-1.5 text-xs text-gray-700">
+                  <CheckCircle size={13} className="text-green-500 shrink-0" />{left}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-gray-700">
+                  <CheckCircle size={13} className="text-green-500 shrink-0" />{right}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-          <div className="text-center p-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+        {/* 100% Quality Assured */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+            <Shield size={24} className="text-[#2874F0]" />
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-900">100% Quality Assured</h3>
+            <p className="text-xs text-gray-500">Only genuine &amp; working devices are listed.</p>
+          </div>
+        </div>
+
+        {/* Pan India Delivery */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 shadow-sm">
+          <div className="flex items-center gap-4 mb-3">
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
               <Truck size={24} className="text-[#2874F0]" />
             </div>
-            <h3 className="font-bold text-gray-900 mb-2">Pan India Delivery</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">Shipped to any pincode across India with full tracking and insurance.</p>
+            <div>
+              <h3 className="font-bold text-gray-900">Pan India Delivery</h3>
+              <p className="text-xs text-gray-500">Shipped to any pincode across India with full tracking and insurance.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { icon: MapPin,  label: "Pincode Serviceable" },
+              { icon: Package, label: "Secure Packaging"    },
+              { icon: Shield,  label: "Insured Delivery"    },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="flex flex-col items-center gap-1.5 bg-gray-50 rounded-xl p-3 text-center">
+                <Icon size={18} className="text-[#2874F0]" />
+                <span className="text-[10px] text-gray-600 font-medium leading-tight">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Warranty Protection */}
+        <div className="mb-6">
+          <div className="text-center mb-4">
+            <h3 className="text-lg font-black text-gray-900">Warranty Protection</h3>
+            <p className="text-xs text-gray-500">Buy with confidence on CashBid</p>
           </div>
 
-          <div className="text-center p-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Award size={24} className="text-[#2874F0]" />
+          {/* 3 warranty columns */}
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {/* Auction Devices */}
+            <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
+              <p className="text-[11px] font-bold text-gray-800 text-center mb-2">Auction Devices</p>
+              <div className="bg-[#2874F0] text-white text-[9px] font-bold rounded-full px-2 py-1 text-center mb-2 leading-tight">9-Day Check Warranty</div>
+              <p className="text-[9px] text-gray-500 font-semibold mb-1">Return accepted for:</p>
+              {["Device Not Powering On", "Display Not Working", "Major Undisclosed Issues"].map((item) => (
+                <div key={item} className="flex items-start gap-1 mb-0.5">
+                  <CheckCircle size={9} className="text-green-500 shrink-0 mt-0.5" />
+                  <span className="text-[9px] text-gray-600 leading-tight">{item}</span>
+                </div>
+              ))}
             </div>
-            <h3 className="font-bold text-gray-900 mb-2">Bid More. Pay Less.</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">₹100 per bid. If you win, that ₹100 bid cost is deducted from the final device price.</p>
+
+            {/* Refurbished Devices */}
+            <div className="bg-green-50 rounded-xl p-3 border border-green-100">
+              <p className="text-[11px] font-bold text-gray-800 text-center mb-2">Refurbished Devices</p>
+              <div className="bg-green-500 text-white text-[9px] font-bold rounded-full px-2 py-1 text-center mb-2 leading-tight">Delivery Warranty Only</div>
+              {["Device Power On Guaranteed", "Display ON Guaranteed"].map((item) => (
+                <div key={item} className="flex items-start gap-1 mb-0.5">
+                  <CheckCircle size={9} className="text-green-500 shrink-0 mt-0.5" />
+                  <span className="text-[9px] text-gray-600 leading-tight">{item}</span>
+                </div>
+              ))}
+              <div className="flex items-center gap-1 mt-1">
+                <X size={9} className="text-red-500 shrink-0" />
+                <span className="text-[9px] text-red-500 font-semibold">No Further Warranty</span>
+              </div>
+            </div>
+
+            {/* Bulk Lots */}
+            <div className="bg-gray-50 rounded-xl p-3 border border-gray-200">
+              <p className="text-[11px] font-bold text-gray-800 text-center mb-2">Bulk Lots</p>
+              <div className="bg-gray-400 text-white text-[9px] font-bold rounded-full px-2 py-1 text-center mb-2 leading-tight">No Warranty</div>
+              {["No Return", "No Refund", "No Warranty"].map((item) => (
+                <div key={item} className="flex items-center gap-1 mb-0.5">
+                  <span className="text-gray-400 text-[9px]">•</span>
+                  <span className="text-[9px] text-gray-500">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 2-Day / Unboxing / Seal row */}
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {[
+              { icon: Clock,   label: "2 Day Check Warranty"     },
+              { icon: Video,   label: "Unboxing Video Required"   },
+              { icon: Shield,  label: "Warranty Seal Required"    },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="bg-white rounded-xl border border-gray-100 p-3 flex flex-col items-center text-center gap-1.5 shadow-sm">
+                <Icon size={18} className="text-[#2874F0]" />
+                <span className="text-[10px] text-gray-600 font-medium leading-tight">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-center gap-1.5 text-xs text-red-600 font-semibold">
+            <AlertCircle size={13} />
+            Seal Removed = Warranty Void
+          </div>
+        </div>
+
+        {/* Why Choose CashBid? */}
+        <div className="border-t border-gray-100 pt-6">
+          <h3 className="text-base font-black text-gray-900 text-center mb-5">Why Choose CashBid?</h3>
+          <div className="grid grid-cols-5 gap-2">
+            {[
+              { icon: CheckCircle, label: "10 Point Quality Check",  color: "text-blue-500",   bg: "bg-blue-50"   },
+              { icon: Shield,      label: "IMEI Verified Devices",   color: "text-green-500",  bg: "bg-green-50"  },
+              { icon: Zap,         label: "Honest Bidding System",   color: "text-yellow-500", bg: "bg-yellow-50" },
+              { icon: Package,     label: "Secure Packaging",        color: "text-orange-500", bg: "bg-orange-50" },
+              { icon: Headphones,  label: "Dedicated Support",       color: "text-purple-500", bg: "bg-purple-50" },
+            ].map(({ icon: Icon, label, color, bg }) => (
+              <div key={label} className="flex flex-col items-center text-center gap-2">
+                <div className={`w-12 h-12 rounded-full ${bg} flex items-center justify-center`}>
+                  <Icon size={22} className={color} />
+                </div>
+                <span className="text-[10px] text-gray-600 font-medium leading-tight">{label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>

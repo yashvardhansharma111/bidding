@@ -5,6 +5,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import type { IAuction } from "@/types";
 import { ImageUploader } from "./ImageUploader";
+import { ExcelUploader } from "./ExcelUploader";
 
 interface AuctionFormProps {
   initialData?: IAuction;
@@ -27,6 +28,8 @@ const EMPTY_FORM = {
   baseBidPrice: 1000,
   minIncrement: 100,
   buyNowPrice: "",
+  warranty: "",
+  excelFile: "",
   startTime: "",
   endTime: "",
   sellerSource: "warehouse" as const,
@@ -124,6 +127,7 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
       endTime: toISTInputString(new Date(initialData.endTime)),
       buyNowPrice: initialData.buyNowPrice?.toString() || "",
       images: initialData.images.length ? initialData.images : [],
+      excelFile: initialData.excelFile || "",
       specs: { ...EMPTY_FORM.specs, ...initialData.specs },
     };
   });
@@ -156,6 +160,8 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
         ...form,
         images: form.images.filter(Boolean),
         buyNowPrice: form.buyNowPrice ? parseFloat(form.buyNowPrice as string) : undefined,
+        warranty: form.warranty?.trim() || undefined,
+        excelFile: form.excelFile || undefined,
         startTime: new Date(form.startTime).toISOString(),
         endTime: new Date(form.endTime).toISOString(),
       };
@@ -280,6 +286,27 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
             </div>
           ))}
         </div>
+
+        {/* Warranty */}
+        <div className="mt-4">
+          <label className={labelCls}>Warranty</label>
+          <select
+            value={form.warranty}
+            onChange={(e) => set("warranty", e.target.value)}
+            className={inputCls}
+          >
+            <option value="">No Warranty</option>
+            <option value="Under Brand Warranty">Under Brand Warranty</option>
+            <option value="1 Month Remaining">1 Month Remaining</option>
+            <option value="2 Months Remaining">2 Months Remaining</option>
+            <option value="3 Months Remaining">3 Months Remaining</option>
+            <option value="6 Months Remaining">6 Months Remaining</option>
+            <option value="9 Months Remaining">9 Months Remaining</option>
+            <option value="12 Months Remaining">12 Months Remaining</option>
+            <option value="18 Months Remaining">18 Months Remaining</option>
+            <option value="24 Months Remaining">24 Months Remaining</option>
+          </select>
+        </div>
       </section>
 
       {/* Images */}
@@ -291,6 +318,20 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
           maxFiles={8}
         />
       </section>
+
+      {/* Bulk Excel Upload */}
+      {form.category === "bulk" && (
+        <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h2 className="font-bold text-gray-900 mb-1">Bulk Lot Excel Sheet</h2>
+          <p className="text-xs text-gray-400 mb-4">
+            Upload an Excel/CSV file listing all items in this bulk lot (IMEI numbers, conditions, storage, etc.)
+          </p>
+          <ExcelUploader
+            value={form.excelFile}
+            onChange={(url) => set("excelFile", url)}
+          />
+        </section>
+      )}
 
       {/* Auction Settings */}
       <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
@@ -333,8 +374,22 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
             <input required type="number" min={1} value={form.minIncrement} onChange={(e) => set("minIncrement", parseFloat(e.target.value))} className={inputCls} />
           </div>
           <div>
-            <label className={labelCls}>Buy Now Price (₹)</label>
-            <input type="number" value={form.buyNowPrice} onChange={(e) => set("buyNowPrice", e.target.value)} className={inputCls} placeholder="Optional" />
+            <label className={labelCls}>
+              {(form.category === "bulk" || form.condition === "refurbished")
+                ? "Fixed Sale Price (₹) *"
+                : "Buy Now Price (₹)"}
+            </label>
+            {(form.category === "bulk" || form.condition === "refurbished") && (
+              <p className="text-xs text-orange-600 mb-1">Required — this is the final price, no bidding will occur</p>
+            )}
+            <input
+              type="number"
+              required={form.category === "bulk" || form.condition === "refurbished"}
+              value={form.buyNowPrice}
+              onChange={(e) => set("buyNowPrice", e.target.value)}
+              className={inputCls}
+              placeholder={(form.category === "bulk" || form.condition === "refurbished") ? "Enter fixed price" : "Optional"}
+            />
           </div>
           <div>
             <label className={labelCls}>Delivery Charges (₹)</label>

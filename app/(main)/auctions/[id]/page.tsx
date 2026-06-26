@@ -9,7 +9,7 @@ import { ImageGallery } from "@/components/auctions/ImageGallery";
 import { Badge } from "@/components/shared/Badge";
 import { formatCurrency, formatDate, getConditionLabel, getSellerSourceLabel } from "@/lib/utils/formatters";
 import type { IAuction, IBid } from "@/types";
-import { Package, Truck, Info } from "lucide-react";
+import { Package, Truck, Info, FileSpreadsheet } from "lucide-react";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -62,6 +62,7 @@ export default async function AuctionDetailPage({ params }: Props) {
     { label: "Camera", value: auction.specs?.camera },
     { label: "OS", value: auction.specs?.os },
     { label: "Color", value: auction.specs?.color },
+    { label: "Warranty", value: auction.warranty },
   ].filter((r) => r.value);
 
   return (
@@ -151,6 +152,23 @@ export default async function AuctionDetailPage({ params }: Props) {
                 {auction.deliveryCharges === 0 ? "Free Delivery" : `₹${auction.deliveryCharges} delivery`}
               </p>
             </div>
+            {auction.excelFile && (
+              <div className="sm:col-span-2 border-t border-gray-100 pt-4">
+                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <FileSpreadsheet size={15} /> Bulk Lot Details
+                </h3>
+                <a
+                  href={auction.excelFile}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors"
+                >
+                  <FileSpreadsheet size={15} />
+                  Download Item List (Excel/CSV)
+                </a>
+                <p className="text-xs text-gray-400 mt-1.5">Full list of items included in this bulk lot</p>
+              </div>
+            )}
           </div>
 
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">

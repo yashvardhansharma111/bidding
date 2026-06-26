@@ -22,7 +22,7 @@ export default function WatchlistPage() {
   }, [isAuthenticated, router]);
 
   return (
-    <div className="max-w-7xl mx-auto px-0 py-6">
+    <div className="max-w-7xl mx-auto px-3 sm:px-0 py-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">My Watchlist</h1>
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

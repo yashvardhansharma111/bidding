@@ -6,6 +6,32 @@ import { useUploadThing } from "@/lib/uploadthing/client";
 import { X, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 
+async function compressImage(file: File, maxPx = 1200, quality = 0.82): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxPx) { height = Math.round((height * maxPx) / width); width = maxPx; }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { resolve(file); return; }
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
 interface ImageUploaderProps {
   value: string[];
   onChange: (urls: string[]) => void;
@@ -30,10 +56,12 @@ export function ImageUploader({ value, onChange, maxFiles = 8 }: ImageUploaderPr
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: useCallback(
-      (acceptedFiles: File[]) => {
+      async (acceptedFiles: File[]) => {
         if (acceptedFiles.length === 0) return;
         const remaining = maxFiles - value.length;
-        startUpload(acceptedFiles.slice(0, remaining));
+        const sliced = acceptedFiles.slice(0, remaining);
+        const compressed = await Promise.all(sliced.map((f) => compressImage(f)));
+        startUpload(compressed);
       },
       [value.length, maxFiles, startUpload]
     ),

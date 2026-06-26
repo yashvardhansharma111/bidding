@@ -28,7 +28,7 @@ export default async function OrdersPage() {
     .lean();
 
   return (
-    <div className="max-w-4xl mx-auto px-0 py-6">
+    <div className="max-w-4xl mx-auto px-3 sm:px-0 py-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">My Orders</h1>
       {orders.length === 0 ? (
         <div className="text-center py-16">

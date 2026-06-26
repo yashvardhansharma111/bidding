@@ -188,7 +188,7 @@ export default function WalletPage() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4 px-3 sm:px-0">
         {/* Balance cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-gradient-to-r from-[#2874F0] to-blue-700 rounded-2xl p-4 sm:p-6 text-white">

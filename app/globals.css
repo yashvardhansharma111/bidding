@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  overflow-x: hidden;
+}
+
 @theme inline {
   --color-primary: #2874F0;
   --color-primary-dark: #1a5dcf;

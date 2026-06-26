@@ -27,17 +27,15 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-[#2874F0] shadow-md">
       {/* Top bar */}
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4">
         <div className="flex items-center gap-2 sm:gap-4 h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Link href="/" className="flex items-center gap-1.5 shrink-0">
             <Gavel className="text-[#FFE500]" size={26} />
             <div className="hidden sm:block">
               <span className="text-white font-bold text-xl leading-none">CashBid</span>
               <span className="text-[#FFE500] text-xs block leading-none italic">Bid More. Pay Less.</span>
             </div>
-            {/* Show brand name on mobile too */}
-            <span className="sm:hidden text-white font-bold text-lg leading-none">CashBid</span>
           </Link>
 
           {/* Search */}

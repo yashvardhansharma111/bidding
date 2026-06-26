@@ -26,6 +26,8 @@ export interface IAuctionDoc extends Omit<Document, "model"> {
   baseBidPrice: number;
   minIncrement: number;
   buyNowPrice?: number;
+  warranty?: string;
+  excelFile?: string;
   currentBid: number;
   totalBidders: number;
   totalBids: number;
@@ -70,6 +72,8 @@ const AuctionSchema = new Schema<IAuctionDoc>(
     baseBidPrice: { type: Number, required: true, min: 0 },
     minIncrement: { type: Number, required: true, min: 1 },
     buyNowPrice: { type: Number },
+  warranty: { type: String, trim: true },
+    excelFile: { type: String, trim: true },
     currentBid: { type: Number, default: 0 },
     totalBidders: { type: Number, default: 0 },
     totalBids: { type: Number, default: 0 },

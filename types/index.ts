@@ -65,6 +65,8 @@ export interface IAuction {
   baseBidPrice: number;
   minIncrement: number;
   buyNowPrice?: number;
+  warranty?: string;
+  excelFile?: string;
   currentBid: number;
   totalBidders: number;
   totalBids: number;
