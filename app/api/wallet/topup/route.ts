@@ -52,9 +52,23 @@ export async function POST(req: NextRequest) {
       currency: "INR",
       keyId,
     });
-  } catch (err) {
-    console.error("[wallet/topup] ERROR:", err);
-    if ((err as Error).message === "Unauthorized") return apiError("Unauthorized", 401);
-    return apiError((err as Error).message || "Internal server error", 500);
+  } catch (err: any) {
+    // Razorpay SDK throws non-standard error objects — log everything
+    console.error("[wallet/topup] ERROR type:", typeof err);
+    console.error("[wallet/topup] ERROR keys:", err && typeof err === "object" ? Object.keys(err) : "N/A");
+    console.error("[wallet/topup] ERROR message:", err?.message);
+    console.error("[wallet/topup] ERROR error:", JSON.stringify(err?.error ?? err, null, 2));
+
+    if (err?.message === "Unauthorized") return apiError("Unauthorized", 401);
+
+    // Razorpay SDK wraps API errors in err.error
+    const razorpayDesc =
+      err?.error?.description ||
+      err?.error?.error?.description ||
+      err?.error?.message;
+
+    const finalMsg = razorpayDesc || err?.message || JSON.stringify(err) || "Unknown error";
+    console.error("[wallet/topup] Returning error to client:", finalMsg);
+    return apiError(finalMsg, 500);
   }
 }

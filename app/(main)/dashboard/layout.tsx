@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* Desktop sidebar + content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="hidden lg:block lg:w-52 shrink-0">
             <nav className="flex flex-col gap-1">

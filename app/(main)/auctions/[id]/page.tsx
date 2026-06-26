@@ -65,7 +65,7 @@ export default async function AuctionDetailPage({ params }: Props) {
   ].filter((r) => r.value);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
       {/* Breadcrumb */}
       <nav className="text-xs text-gray-400 mb-4 flex items-center gap-1 overflow-hidden">
         <a href="/" className="hover:text-[#2874F0] shrink-0">Home</a>
