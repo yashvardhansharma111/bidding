@@ -19,6 +19,7 @@ export function AuctionCard({ auction, isWatched = false }: AuctionCardProps) {
   const time = useCountdown(auction.endTime);
   const isLive = auction.status === "live";
   const isEnded = auction.status === "ended";
+  const isFixedPrice = auction.condition === "refurbished" || auction.category === "bulk";
 
   const timeDisplay = isLive
     ? time.total > 0
@@ -102,32 +103,36 @@ export function AuctionCard({ auction, isWatched = false }: AuctionCardProps) {
         </div>
 
         {/* Meta */}
-        <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-          <div className="flex items-center gap-1">
-            <Users size={12} />
-            <span>{auction.totalBidders} bidders</span>
+        {!isFixedPrice && (
+          <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center gap-1">
+              <Users size={12} />
+              <span>{auction.totalBidders} bidders</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {isLive && !isEnded && <TrendingUp size={12} className="text-green-500" />}
+              <span className={isLive && time.total < 3600000 ? "text-red-500 font-semibold" : ""}>
+                <Clock size={12} className="inline mr-0.5" />
+                {timeDisplay}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            {isLive && !isEnded && <TrendingUp size={12} className="text-green-500" />}
-            <span className={isLive && time.total < 3600000 ? "text-red-500 font-semibold" : ""}>
-              <Clock size={12} className="inline mr-0.5" />
-              {timeDisplay}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* CTA */}
         <Link
           href={`/auctions/${auction._id}`}
           className={`mt-3 block text-center text-sm font-semibold py-2 rounded-lg transition-colors ${
-            isLive
+            isFixedPrice
+              ? "bg-[#2874F0] text-white hover:bg-blue-700"
+              : isLive
               ? "bg-[#2874F0] text-white hover:bg-blue-700"
               : isEnded
               ? "bg-gray-100 text-gray-500 cursor-not-allowed"
               : "bg-[#FFE500] text-[#2874F0] hover:bg-yellow-300"
           }`}
         >
-          {isLive ? "Bid Now" : isEnded ? "View Result" : "View Details"}
+          {isFixedPrice ? "Buy Now" : isLive ? "Bid Now" : isEnded ? "View Result" : "View Details"}
         </Link>
       </div>
     </motion.div>

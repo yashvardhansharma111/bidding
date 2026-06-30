@@ -172,16 +172,16 @@ export default async function HomePage() {
       {/* Category quick links */}
       <div className="grid grid-cols-2 gap-3 my-6">
         {[
-          { href: "/auctions?condition=refurbished", label: "Refurbished", icon: Smartphone, bg: "bg-green-50",  iconBg: "bg-green-100",  iconColor: "text-green-600"  },
-          { href: "/auctions?category=bulk",         label: "Bulk Lots",   icon: Package,   bg: "bg-orange-50", iconBg: "bg-orange-100", iconColor: "text-orange-500" },
-        ].map(({ href, label, icon: Icon, bg, iconBg, iconColor }) => (
+          { href: "/auctions?condition=refurbished", label: "Refurbished", emoji: "♻️", bg: "bg-green-50",  iconBg: "bg-green-100"  },
+          { href: "/auctions?category=bulk",         label: "Bulk Lots",   emoji: "📦", bg: "bg-orange-50", iconBg: "bg-orange-100" },
+        ].map(({ href, label, emoji, bg, iconBg }) => (
           <Link
             key={href}
             href={href}
             className={`${bg} rounded-2xl py-8 px-4 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-shadow group`}
           >
-            <div className={`w-16 h-16 rounded-2xl ${iconBg} flex items-center justify-center`}>
-              <Icon size={32} className={iconColor} />
+            <div className={`w-16 h-16 rounded-2xl ${iconBg} flex items-center justify-center text-4xl`}>
+              {emoji}
             </div>
             <p className="font-bold text-gray-700 text-base group-hover:text-[#2874F0] transition-colors">{label}</p>
           </Link>

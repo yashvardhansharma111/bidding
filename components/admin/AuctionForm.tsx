@@ -140,6 +140,7 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
   const setSpec = (key: string, value: string) => setForm((f) => ({ ...f, specs: { ...f.specs, [key]: value } }));
 
   const fillDummy = (preset: (typeof DUMMY_PRESETS)[number]) => {
+    const isFixed = preset.data.condition === "refurbished" || preset.data.category === "bulk";
     const now = new Date();
     const start = new Date(now.getTime() + 10 * 60 * 1000);
     const end = new Date(now.getTime() + 2 * 60 * 60 * 1000);
@@ -147,17 +148,23 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
       ...f,
       ...(preset.data as any),
       images: f.images,
-      startTime: toISTInputString(start),
-      endTime: toISTInputString(end),
+      startTime: isFixed ? "" : toISTInputString(start),
+      endTime: isFixed ? "" : toISTInputString(end),
     }));
     setDemoOpen(false);
     toast.success(`Filled with "${preset.label}" demo data`);
   };
 
+  const isFixedPrice = form.condition === "refurbished" || form.category === "bulk";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      const now = new Date();
+      const farFuture = new Date(now.getTime() + 10 * 365 * 24 * 60 * 60 * 1000);
+      const fixedPrice = parseFloat(form.buyNowPrice as string) || 1;
+
       const payload = {
         ...form,
         images: form.images.filter(Boolean),
@@ -165,8 +172,10 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
         warranty: form.warranty?.trim() || undefined,
         customerReview: form.condition === "refurbished" ? form.customerReview?.trim() || undefined : undefined,
         excelFile: form.excelFile || undefined,
-        startTime: new Date(form.startTime).toISOString(),
-        endTime: new Date(form.endTime).toISOString(),
+        startTime: isFixedPrice ? now.toISOString() : new Date(form.startTime).toISOString(),
+        endTime: isFixedPrice ? farFuture.toISOString() : new Date(form.endTime).toISOString(),
+        baseBidPrice: isFixedPrice ? fixedPrice : form.baseBidPrice,
+        minIncrement: isFixedPrice ? 100 : form.minIncrement,
       };
 
       if (auctionId) {
@@ -351,7 +360,16 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
 
       {/* Auction Settings */}
       <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <h2 className="font-bold text-gray-900 mb-2">Auction Settings</h2>
+        <h2 className="font-bold text-gray-900 mb-2">
+          {isFixedPrice ? "Listing Settings" : "Auction Settings"}
+        </h2>
+
+        {isFixedPrice && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-700 font-medium">
+            {form.condition === "refurbished" ? "♻️ Refurbished" : "📦 Bulk Lot"} — Fixed price listing. No bidding, no auction timer. Listing stays live until you delete it.
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Category *</label>
@@ -360,65 +378,73 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
               <option value="bulk">Bulk Lot</option>
             </select>
           </div>
+
           {form.category === "bulk" && (
-            <>
-              <div>
-                <label className={labelCls}>Quantity *</label>
-                <input required type="number" min={2} value={form.quantity} onChange={(e) => set("quantity", parseInt(e.target.value))} className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Winner Type</label>
-                <select value={form.bulkWinnerType} onChange={(e) => set("bulkWinnerType", e.target.value)} className={selectCls}>
-                  <option value="winner_takes_all">Winner Takes All</option>
-                  <option value="top_n_bidders">Top N Bidders</option>
-                </select>
-              </div>
-              {form.bulkWinnerType === "top_n_bidders" && (
-                <div>
-                  <label className={labelCls}>Number of Winners</label>
-                  <input type="number" min={2} value={form.topNWinners} onChange={(e) => set("topNWinners", parseInt(e.target.value))} className={inputCls} />
-                </div>
-              )}
-            </>
+            <div>
+              <label className={labelCls}>Quantity *</label>
+              <input required type="number" min={2} value={form.quantity} onChange={(e) => set("quantity", parseInt(e.target.value))} className={inputCls} />
+            </div>
           )}
-          <div>
-            <label className={labelCls}>Base Bid Price (₹) *</label>
-            <input required type="number" min={1} value={form.baseBidPrice} onChange={(e) => set("baseBidPrice", parseFloat(e.target.value))} className={inputCls} />
-          </div>
-          <div>
-            <label className={labelCls}>Min Increment (₹) *</label>
-            <input required type="number" min={1} value={form.minIncrement} onChange={(e) => set("minIncrement", parseFloat(e.target.value))} className={inputCls} />
-          </div>
+
           <div>
             <label className={labelCls}>
-              {(form.category === "bulk" || form.condition === "refurbished")
-                ? "Fixed Sale Price (₹) *"
-                : "Buy Now Price (₹)"}
+              {isFixedPrice ? "Fixed Sale Price (₹) *" : "Buy Now Price (₹)"}
             </label>
-            {(form.category === "bulk" || form.condition === "refurbished") && (
-              <p className="text-xs text-orange-600 mb-1">Required — this is the final price, no bidding will occur</p>
+            {isFixedPrice && (
+              <p className="text-xs text-orange-600 mb-1">This is the direct purchase price customers will pay</p>
             )}
             <input
               type="number"
-              required={form.category === "bulk" || form.condition === "refurbished"}
+              required={isFixedPrice}
               value={form.buyNowPrice}
               onChange={(e) => set("buyNowPrice", e.target.value)}
               className={inputCls}
-              placeholder={(form.category === "bulk" || form.condition === "refurbished") ? "Enter fixed price" : "Optional"}
+              placeholder={isFixedPrice ? "Enter fixed price" : "Optional"}
             />
           </div>
+
           <div>
             <label className={labelCls}>Delivery Charges (₹)</label>
             <input type="number" min={0} value={form.deliveryCharges} onChange={(e) => set("deliveryCharges", parseFloat(e.target.value))} className={inputCls} />
           </div>
-          <div>
-            <label className={labelCls}>Start Time *</label>
-            <input required type="datetime-local" value={form.startTime} onChange={(e) => set("startTime", e.target.value)} className={inputCls} />
-          </div>
-          <div>
-            <label className={labelCls}>End Time *</label>
-            <input required type="datetime-local" value={form.endTime} onChange={(e) => set("endTime", e.target.value)} className={inputCls} />
-          </div>
+
+          {!isFixedPrice && (
+            <>
+              <div>
+                <label className={labelCls}>Base Bid Price (₹) *</label>
+                <input required type="number" min={1} value={form.baseBidPrice} onChange={(e) => set("baseBidPrice", parseFloat(e.target.value))} className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Min Increment (₹) *</label>
+                <input required type="number" min={1} value={form.minIncrement} onChange={(e) => set("minIncrement", parseFloat(e.target.value))} className={inputCls} />
+              </div>
+              {form.category === "bulk" && (
+                <>
+                  <div>
+                    <label className={labelCls}>Winner Type</label>
+                    <select value={form.bulkWinnerType} onChange={(e) => set("bulkWinnerType", e.target.value)} className={selectCls}>
+                      <option value="winner_takes_all">Winner Takes All</option>
+                      <option value="top_n_bidders">Top N Bidders</option>
+                    </select>
+                  </div>
+                  {form.bulkWinnerType === "top_n_bidders" && (
+                    <div>
+                      <label className={labelCls}>Number of Winners</label>
+                      <input type="number" min={2} value={form.topNWinners} onChange={(e) => set("topNWinners", parseInt(e.target.value))} className={inputCls} />
+                    </div>
+                  )}
+                </>
+              )}
+              <div>
+                <label className={labelCls}>Start Time *</label>
+                <input required type="datetime-local" value={form.startTime} onChange={(e) => set("startTime", e.target.value)} className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>End Time *</label>
+                <input required type="datetime-local" value={form.endTime} onChange={(e) => set("endTime", e.target.value)} className={inputCls} />
+              </div>
+            </>
+          )}
         </div>
       </section>
 
