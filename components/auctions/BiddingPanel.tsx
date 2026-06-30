@@ -21,8 +21,6 @@ function BuyNowPanel({ auction }: { auction: IAuction }) {
 
   const price = auction.buyNowPrice ?? auction.baseBidPrice;
   const total = price + (auction.deliveryCharges ?? 0);
-  const isLive = auction.status === "live";
-  const isEnded = auction.status === "ended";
 
   const handleBuyNow = async () => {
     if (!user) return;
@@ -43,20 +41,11 @@ function BuyNowPanel({ auction }: { auction: IAuction }) {
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
       {/* Header */}
       <div className="bg-[#2874F0] px-5 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-blue-200 text-xs font-medium uppercase tracking-wide">
-              {auction.category === "bulk" ? "Bulk Deal — Fixed Price" : "Refurbished — Fixed Price"}
-            </p>
-            <p className="text-3xl font-bold text-white mt-1">{formatCurrency(price)}</p>
-            <p className="text-blue-200 text-xs mt-0.5">Fixed price — no bidding</p>
-          </div>
-          {isLive && (
-            <div className="text-right">
-              <CountdownTimer endTime={auction.endTime} large />
-            </div>
-          )}
-        </div>
+        <p className="text-blue-200 text-xs font-medium uppercase tracking-wide">
+          {auction.category === "bulk" ? "📦 Bulk Deal — Fixed Price" : "♻️ Refurbished — Fixed Price"}
+        </p>
+        <p className="text-3xl font-bold text-white mt-1">{formatCurrency(price)}</p>
+        <p className="text-blue-200 text-xs mt-0.5">Fixed price · No bidding · Always available</p>
       </div>
 
       {/* Price breakdown */}
@@ -84,15 +73,6 @@ function BuyNowPanel({ auction }: { auction: IAuction }) {
             <CheckCircle size={32} />
             <p className="font-bold">Purchase Confirmed!</p>
             <p className="text-sm text-gray-500">Redirecting to address form…</p>
-          </div>
-        ) : isEnded ? (
-          <div className="text-center py-4">
-            <p className="text-gray-500 font-medium">This listing has ended.</p>
-          </div>
-        ) : !isLive ? (
-          <div className="text-center py-4">
-            <p className="text-[#2874F0] font-medium">Available soon</p>
-            <CountdownTimer endTime={auction.startTime} label="Available in" />
           </div>
         ) : !user ? (
           <div className="space-y-3 text-center py-2">

@@ -8,9 +8,14 @@ export async function syncAuctionStatuses() {
       { status: "upcoming", startTime: { $lte: now } },
       { $set: { status: "live" } }
     ),
-    // live → ended
+    // live → ended (never auto-end refurbished or bulk — admin deletes those manually)
     Auction.updateMany(
-      { status: "live", endTime: { $lte: now } },
+      {
+        status: "live",
+        endTime: { $lte: now },
+        condition: { $ne: "refurbished" },
+        category: { $ne: "bulk" },
+      },
       { $set: { status: "ended" } }
     ),
   ]);

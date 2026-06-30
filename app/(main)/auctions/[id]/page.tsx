@@ -31,12 +31,16 @@ async function getAuction(id: string): Promise<IAuction | null> {
 }
 
 async function getInitialBids(auctionId: string): Promise<IBid[]> {
-  const bids = await BidModel.find({ auction: auctionId })
-    .sort({ createdAt: -1 })
-    .limit(20)
-    .populate("bidder", "name avatar")
-    .lean();
-  return JSON.parse(JSON.stringify(bids));
+  try {
+    const bids = await BidModel.find({ auction: auctionId })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .populate("bidder", "name avatar")
+      .lean();
+    return JSON.parse(JSON.stringify(bids));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
