@@ -20,6 +20,7 @@ const EMPTY_FORM = {
   imei: "",
   batchId: "",
   description: "",
+  customerReview: "",
   images: [] as string[],
   category: "individual" as const,
   quantity: 1,
@@ -34,7 +35,7 @@ const EMPTY_FORM = {
   endTime: "",
   sellerSource: "warehouse" as const,
   deliveryCharges: 0,
-  specs: { ram: "", storage: "", processor: "", battery: "", display: "", camera: "", os: "", color: "" },
+  specs: { ram: "", storage: "", processor: "", battery: "", display: "", camera: "", frontCamera: "", backCamera: "", os: "", color: "" },
 };
 
 const DUMMY_PRESETS = [
@@ -48,6 +49,7 @@ const DUMMY_PRESETS = [
       imei: "354723112345678",
       batchId: "",
       description: "Excellent condition iPhone 14 Pro sourced from Flipkart liquidation. Minor cosmetic marks, fully functional. Battery health 91%. Comes with original box and cable.",
+      customerReview: "Phone bilkul premium feel deta hai. Display, battery aur camera performance expected se better nikla.",
       images: [] as string[],
       category: "individual" as const,
       quantity: 1,
@@ -58,7 +60,7 @@ const DUMMY_PRESETS = [
       buyNowPrice: "58000",
       sellerSource: "flipkart_liquidation" as const,
       deliveryCharges: 99,
-      specs: { ram: "6GB", storage: "256GB", processor: "A16 Bionic", battery: "3200mAh", display: "6.1\" OLED ProMotion", camera: "48MP + 12MP + 12MP", os: "iOS 17", color: "Space Black" },
+      specs: { ram: "6GB", storage: "256GB", processor: "A16 Bionic", battery: "3200mAh", display: "6.1\" OLED ProMotion", frontCamera: "12MP", backCamera: "48MP + 12MP + 12MP", os: "iOS 17", color: "Space Black" },
     },
   },
   {
@@ -81,7 +83,7 @@ const DUMMY_PRESETS = [
       buyNowPrice: "78000",
       sellerSource: "warehouse" as const,
       deliveryCharges: 0,
-      specs: { ram: "12GB", storage: "512GB", processor: "Snapdragon 8 Gen 2", battery: "5000mAh", display: "6.8\" Dynamic AMOLED", camera: "200MP + 12MP + 10MP + 10MP", os: "Android 14", color: "Phantom Black" },
+      specs: { ram: "12GB", storage: "512GB", processor: "Snapdragon 8 Gen 2", battery: "5000mAh", display: "6.8\" Dynamic AMOLED", frontCamera: "12MP", backCamera: "200MP + 12MP + 10MP + 10MP", os: "Android 14", color: "Phantom Black" },
     },
   },
   {
@@ -104,7 +106,7 @@ const DUMMY_PRESETS = [
       buyNowPrice: "40000",
       sellerSource: "dealer" as const,
       deliveryCharges: 299,
-      specs: { ram: "4GB / 6GB", storage: "64GB / 128GB", processor: "Snapdragon 685", battery: "5000mAh", display: "6.67\" AMOLED", camera: "50MP + 8MP + 2MP", os: "Android 13 (MIUI 14)", color: "Mixed" },
+      specs: { ram: "4GB / 6GB", storage: "64GB / 128GB", processor: "Snapdragon 685", battery: "5000mAh", display: "6.67\" AMOLED", frontCamera: "13MP", backCamera: "50MP + 8MP + 2MP", os: "Android 13 (MIUI 14)", color: "Mixed" },
     },
   },
 ];
@@ -161,6 +163,7 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
         images: form.images.filter(Boolean),
         buyNowPrice: form.buyNowPrice ? parseFloat(form.buyNowPrice as string) : undefined,
         warranty: form.warranty?.trim() || undefined,
+        customerReview: form.condition === "refurbished" ? form.customerReview?.trim() || undefined : undefined,
         excelFile: form.excelFile || undefined,
         startTime: new Date(form.startTime).toISOString(),
         endTime: new Date(form.endTime).toISOString(),
@@ -255,6 +258,18 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
           <label className={labelCls}>Description *</label>
           <textarea required value={form.description} onChange={(e) => set("description", e.target.value)} rows={4} className={`${inputCls} resize-none`} placeholder="Detailed description of the phone(s)..." />
         </div>
+        {form.condition === "refurbished" && (
+          <div>
+            <label className={labelCls}>Customer Review (optional)</label>
+            <textarea
+              value={form.customerReview}
+              onChange={(e) => set("customerReview", e.target.value)}
+              rows={3}
+              className={`${inputCls} resize-none`}
+              placeholder="e.g. Customer feedback about battery, display, camera, overall condition..."
+            />
+          </div>
+        )}
         <div>
           <label className={labelCls}>Seller Source *</label>
           <select required value={form.sellerSource} onChange={(e) => set("sellerSource", e.target.value)} className={selectCls}>
@@ -276,12 +291,13 @@ export function AuctionForm({ initialData, auctionId }: AuctionFormProps) {
             { key: "processor", placeholder: "e.g. A16 Bionic" },
             { key: "battery", placeholder: "e.g. 4000mAh" },
             { key: "display", placeholder: "e.g. 6.1 OLED" },
-            { key: "camera", placeholder: "e.g. 48MP + 12MP" },
+            { key: "frontCamera", label: "Front Camera", placeholder: "e.g. 12MP" },
+            { key: "backCamera", label: "Back Camera", placeholder: "e.g. 48MP + 12MP" },
             { key: "os", placeholder: "e.g. iOS 17" },
             { key: "color", placeholder: "e.g. Space Black" },
-          ].map(({ key, placeholder }) => (
+          ].map(({ key, label, placeholder }) => (
             <div key={key}>
-              <label className="block text-xs font-medium text-gray-600 mb-1 capitalize">{key}</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1 capitalize">{label || key}</label>
               <input type="text" value={(form.specs as any)[key]} onChange={(e) => setSpec(key, e.target.value)} className={`${inputCls} py-2`} placeholder={placeholder} />
             </div>
           ))}

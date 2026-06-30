@@ -69,7 +69,7 @@ export function ImageGallery({ images }: { images: string[] }) {
               <button
                 key={i}
                 onClick={() => setSelected(i)}
-                className={`relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${i === selected ? "border-[#2874F0]" : "border-gray-200 hover:border-gray-300"}`}
+                className={`relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${i === selected ? "border-[#2874F0]" : "border-gray-200 hover:border-gray-300"}`}
               >
                 <Image src={img} alt={`Thumbnail ${i + 1}`} fill className="object-contain p-1" sizes="64px" />
               </button>

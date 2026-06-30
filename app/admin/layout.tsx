@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 rounded-full bg-[#2874F0] flex items-center justify-center text-white text-sm font-bold shrink-0">
-            {user.name[0].toUpperCase()}
+            {(user.name?.[0] ?? "A").toUpperCase()}
           </div>
           <div className="min-w-0">
             <p className="text-white text-sm font-medium truncate">{user.name}</p>
@@ -143,7 +143,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Gavel size={18} className="text-[#FFE500]" />
           <span className="font-bold text-white text-sm">CashBid Admin</span>
           <div className="ml-auto w-7 h-7 rounded-full bg-[#2874F0] flex items-center justify-center text-white text-xs font-bold">
-            {user.name[0].toUpperCase()}
+            {(user.name?.[0] ?? "A").toUpperCase()}
           </div>
         </div>
 

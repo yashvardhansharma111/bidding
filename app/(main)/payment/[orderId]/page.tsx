@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
@@ -7,7 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@/store/authStore";
 import { formatCurrency } from "@/lib/utils/formatters";
 import { CreditCard, Smartphone, Globe, CheckCircle, XCircle, Shield, ArrowLeft } from "lucide-react";
-import toast from "react-hot-toast";
+
+declare global {
+  interface Window {
+    Razorpay: new (opts: Record<string, unknown>) => { open(): void };
+  }
+}
 
 interface OrderDetail {
   _id: string;
@@ -26,6 +31,17 @@ interface OrderDetail {
 type PaymentMethod = "upi" | "card" | "netbanking";
 type PaymentState = "idle" | "processing" | "success" | "failed";
 
+function loadRazorpay(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window.Razorpay !== "undefined") { resolve(true); return; }
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
+
 export default function PaymentPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const router = useRouter();
@@ -43,18 +59,64 @@ export default function PaymentPage() {
     }).finally(() => setLoading(false));
   }, [orderId, isAuthenticated, router]);
 
-  const handlePay = async () => {
+  const handlePay = useCallback(async () => {
     if (!order) return;
     setPaymentState("processing");
+    setFailReason("");
+
     try {
-      await axios.post("/api/payment", { method, orderId: order._id });
-      setPaymentState("success");
-      setTimeout(() => router.push("/dashboard/orders"), 3000);
+      const loaded = await loadRazorpay();
+      if (!loaded) {
+        setFailReason("Payment SDK failed to load. Check your internet and try again.");
+        setPaymentState("failed");
+        return;
+      }
+
+      const { data } = await axios.post("/api/payment/create-order", { orderId: order._id });
+      const { razorpayOrderId, keyId, amount } = data.data;
+
+      const rzp = new window.Razorpay({
+        key: keyId,
+        amount: Math.round(amount * 100),
+        currency: "INR",
+        name: "CashBid",
+        description: `Order Payment — ${order.auction.title}`,
+        order_id: razorpayOrderId,
+        prefill: { method },
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            await axios.post("/api/payment/verify", {
+              orderId: order._id,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              method,
+            });
+            setPaymentState("success");
+            setTimeout(() => router.push("/dashboard/orders"), 2500);
+          } catch (err: any) {
+            setFailReason(err.response?.data?.error || "Payment verification failed");
+            setPaymentState("failed");
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            if (paymentState === "processing") setPaymentState("idle");
+          },
+        },
+        theme: { color: "#2874F0" },
+      });
+
+      rzp.open();
     } catch (err: any) {
-      setFailReason(err.response?.data?.error || "Payment failed");
+      setFailReason(err.response?.data?.error || "Failed to initiate payment. Try again.");
       setPaymentState("failed");
     }
-  };
+  }, [order, method, router, paymentState]);
 
   if (loading) {
     return (
@@ -108,7 +170,7 @@ export default function PaymentPage() {
         </div>
         <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Winning Bid</span>
+            <span className="text-gray-500">Item Price</span>
             <span className="font-medium">{formatCurrency(order.finalAmount)}</span>
           </div>
           <div className="flex justify-between text-sm">
@@ -122,7 +184,6 @@ export default function PaymentPage() {
         </div>
       </div>
 
-      {/* Payment method selection */}
       <AnimatePresence mode="wait">
         {paymentState === "idle" && (
           <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -158,8 +219,8 @@ export default function PaymentPage() {
               <Shield size={18} />
               Pay {formatCurrency(order.totalAmount)} Securely
             </button>
-            <p className="text-center text-xs text-gray-400 mt-3">
-              🔒 This is a demo payment. No real money is charged.
+            <p className="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1">
+              <Shield size={11} /> Secured by Razorpay
             </p>
           </motion.div>
         )}
@@ -167,7 +228,7 @@ export default function PaymentPage() {
         {paymentState === "processing" && (
           <motion.div key="processing" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center">
             <div className="w-16 h-16 border-4 border-[#2874F0] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-            <p className="font-bold text-gray-900 text-lg mb-2">Processing Payment...</p>
+            <p className="font-bold text-gray-900 text-lg mb-2">Opening Payment...</p>
             <p className="text-gray-400 text-sm">Please wait. Do not close this page.</p>
           </motion.div>
         )}
@@ -178,8 +239,8 @@ export default function PaymentPage() {
               <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />
             </motion.div>
             <h2 className="font-bold text-gray-900 text-xl mb-2">Payment Successful!</h2>
-            <p className="text-gray-500 text-sm">Your order has been confirmed. We&apos;ll send you shipping details soon.</p>
-            <p className="text-gray-400 text-xs mt-4">Redirecting to your orders...</p>
+            <p className="text-gray-500 text-sm">Order confirmed! Your order is being processed.</p>
+            <p className="text-gray-400 text-xs mt-4">Redirecting to your orders…</p>
           </motion.div>
         )}
 

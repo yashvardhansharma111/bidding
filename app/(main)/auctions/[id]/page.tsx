@@ -9,7 +9,8 @@ import { ImageGallery } from "@/components/auctions/ImageGallery";
 import { Badge } from "@/components/shared/Badge";
 import { formatCurrency, formatDate, getConditionLabel, getSellerSourceLabel } from "@/lib/utils/formatters";
 import type { IAuction, IBid } from "@/types";
-import { Package, Truck, Info, FileSpreadsheet } from "lucide-react";
+import { Package, Truck, Info, FileSpreadsheet, Star } from "lucide-react";
+import { AuctionQuickActions } from "@/components/auctions/AuctionQuickActions";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -59,7 +60,8 @@ export default async function AuctionDetailPage({ params }: Props) {
     { label: "Processor", value: auction.specs?.processor },
     { label: "Battery", value: auction.specs?.battery },
     { label: "Display", value: auction.specs?.display },
-    { label: "Camera", value: auction.specs?.camera },
+    { label: "Front Camera", value: auction.specs?.frontCamera },
+    { label: "Back Camera", value: auction.specs?.backCamera || auction.specs?.camera },
     { label: "OS", value: auction.specs?.os },
     { label: "Color", value: auction.specs?.color },
     { label: "Warranty", value: auction.warranty },
@@ -102,7 +104,6 @@ export default async function AuctionDetailPage({ params }: Props) {
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{auction.title}</h1>
             <p className="text-gray-500">{auction.brand} {auction.model}</p>
-            <p className="text-sm text-gray-400 mt-2">Listed: {formatDate(auction.createdAt)}</p>
           </div>
         </div>
 
@@ -135,6 +136,15 @@ export default async function AuctionDetailPage({ params }: Props) {
             <h2 className="font-bold text-gray-900 mb-3">Description</h2>
             <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{auction.description}</p>
           </div>
+
+          {auction.condition === "refurbished" && auction.customerReview && (
+            <div className="bg-white rounded-xl border border-amber-100 shadow-sm p-4 sm:p-5">
+              <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <Star size={16} className="text-amber-500 fill-amber-500" /> Customer Review
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{auction.customerReview}</p>
+            </div>
+          )}
 
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -171,10 +181,15 @@ export default async function AuctionDetailPage({ params }: Props) {
             )}
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
-            <h2 className="font-bold text-gray-900 mb-4">Bid History</h2>
-            <BidHistory bids={bids} />
-          </div>
+          {auction.condition !== "refurbished" && auction.category !== "bulk" && (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
+              <h2 className="font-bold text-gray-900 mb-4">Bid History</h2>
+              <BidHistory bids={bids} />
+            </div>
+          )}
+          {(auction.condition === "refurbished" || auction.category === "bulk") && (
+            <AuctionQuickActions auction={auction} showBuyNow={false} />
+          )}
         </div>
 
       </div>

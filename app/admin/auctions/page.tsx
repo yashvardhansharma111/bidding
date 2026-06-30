@@ -11,10 +11,12 @@ interface Auction {
   title: string;
   brand: string;
   status: string;
+  condition?: string;
   currentBid: number;
   totalBids: number;
   endTime: string;
   category: string;
+  winner?: string;
 }
 
 export default function AdminAuctionsPage() {
@@ -84,7 +86,7 @@ export default function AdminAuctionsPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-4 flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative flex-1 min-w-[150px] sm:min-w-[200px]">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
@@ -141,9 +143,16 @@ export default function AdminAuctionsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getAuctionStatusColor(a.status)}`}>
-                          {a.status}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium inline-block w-fit ${getAuctionStatusColor(a.status)}`}>
+                            {a.status}
+                          </span>
+                          {a.status === "ended" && a.winner && (
+                            <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-green-100 text-green-700 inline-block w-fit">
+                              SOLD
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-4 font-semibold text-[#2874F0]">{formatCurrency(a.currentBid)}</td>
                       <td className="px-4 py-4 text-gray-600">{a.totalBids}</td>

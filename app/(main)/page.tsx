@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { connectDB } from "@/lib/db/connect";
 import Auction from "@/lib/db/models/Auction";
 import { AuctionCard } from "@/components/auctions/AuctionCard";
+import { HomeHeroSecondaryCta } from "@/components/home/HomeHeroSecondaryCta";
 import { SkeletonGrid } from "@/components/shared/SkeletonCard";
 import { Zap, Clock, Package, ArrowRight, Shield, Award, CheckCircle, Truck, Smartphone, IndianRupee, MapPin, X, AlertCircle, Headphones, Video } from "lucide-react";
 import type { IAuction } from "@/types";
@@ -112,12 +113,7 @@ export default async function HomePage() {
             >
               Bid Live Now
             </Link>
-            <Link
-              href="/register"
-              className="border-2 border-white/40 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/10 transition-colors"
-            >
-              Join Free →
-            </Link>
+            <HomeHeroSecondaryCta />
           </div>
         </div>
       </section>
@@ -310,11 +306,11 @@ export default async function HomePage() {
           </div>
 
           {/* 3 warranty columns */}
-          <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
             {/* Auction Devices */}
             <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
               <p className="text-[11px] font-bold text-gray-800 text-center mb-2">Auction Devices</p>
-              <div className="bg-[#2874F0] text-white text-[9px] font-bold rounded-full px-2 py-1 text-center mb-2 leading-tight">9-Day Check Warranty</div>
+              <div className="bg-[#2874F0] text-white text-[9px] font-bold rounded-full px-2 py-1 text-center mb-2 leading-tight">7-Day Check Warranty</div>
               <p className="text-[9px] text-gray-500 font-semibold mb-1">Return accepted for:</p>
               {["Device Not Powering On", "Display Not Working", "Major Undisclosed Issues"].map((item) => (
                 <div key={item} className="flex items-start gap-1 mb-0.5">
@@ -356,7 +352,7 @@ export default async function HomePage() {
           {/* 2-Day / Unboxing / Seal row */}
           <div className="grid grid-cols-3 gap-2 mb-3">
             {[
-              { icon: Clock,   label: "2 Day Check Warranty"     },
+              { icon: Clock,   label: "7 Day Check Warranty"     },
               { icon: Video,   label: "Unboxing Video Required"   },
               { icon: Shield,  label: "Warranty Seal Required"    },
             ].map(({ icon: Icon, label }) => (
@@ -376,7 +372,7 @@ export default async function HomePage() {
         {/* Why Choose CashBid? */}
         <div className="border-t border-gray-100 pt-6">
           <h3 className="text-base font-black text-gray-900 text-center mb-5">Why Choose CashBid?</h3>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
             {[
               { icon: CheckCircle, label: "10 Point Quality Check",  color: "text-blue-500",   bg: "bg-blue-50"   },
               { icon: Shield,      label: "IMEI Verified Devices",   color: "text-green-500",  bg: "bg-green-50"  },

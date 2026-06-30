@@ -83,10 +83,12 @@ export function AuctionCard({ auction, isWatched = false }: AuctionCardProps) {
           </p>
         )}
 
-        {/* Current bid */}
+        {/* Price */}
         <div className="mt-2.5 flex items-center justify-between">
           <div>
-            <p className="text-xs text-gray-400">Current Bid</p>
+            <p className="text-xs text-gray-400">
+              {auction.condition === "refurbished" || auction.category === "bulk" ? "Price" : "Current Bid"}
+            </p>
             <p className="text-lg font-bold text-[#2874F0]">{formatCurrency(auction.currentBid)}</p>
           </div>
           <button

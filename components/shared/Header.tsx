@@ -169,16 +169,17 @@ export function Header() {
         {/* Nav links */}
         <div className="hidden sm:flex items-center gap-6 pb-2 text-sm">
           {[
-            { href: "/auctions?status=live", label: "Live Auctions" },
-            { href: "/auctions?status=upcoming", label: "Upcoming" },
-            { href: "/auctions?category=bulk", label: "Bulk Lots" },
-            { href: "/auctions?condition=refurbished", label: "Refurbished" },
+            { href: "/auctions?status=live",           label: "Live Auctions", icon: "🔨" },
+            { href: "/auctions?status=upcoming",       label: "Upcoming",      icon: "🕐" },
+            { href: "/auctions?category=bulk",         label: "Bulk Lots",     icon: "📦" },
+            { href: "/auctions?condition=refurbished", label: "Refurbished",   icon: "♻️" },
           ].map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-white/80 hover:text-white hover:text-[#FFE500] transition-colors font-medium"
+              className="text-white/80 hover:text-[#FFE500] transition-colors font-medium flex items-center gap-1.5"
             >
+              <span>{item.icon}</span>
               {item.label}
             </Link>
           ))}
@@ -198,17 +199,18 @@ export function Header() {
               {/* Auctions links */}
               <p className="text-white/50 text-[10px] uppercase tracking-widest font-bold pt-2 pb-1">Auctions</p>
               {[
-                { href: "/auctions?status=live",          label: "Live Auctions" },
-                { href: "/auctions?status=upcoming",      label: "Upcoming"      },
-                { href: "/auctions?category=bulk",        label: "Bulk Lots"     },
-                { href: "/auctions?condition=refurbished",label: "Refurbished"   },
+                { href: "/auctions?status=live",           label: "Live Auctions", icon: "🔨" },
+                { href: "/auctions?status=upcoming",       label: "Upcoming",      icon: "🕐" },
+                { href: "/auctions?category=bulk",         label: "Bulk Lots",     icon: "📦" },
+                { href: "/auctions?condition=refurbished", label: "Refurbished",   icon: "♻️" },
               ].map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className="text-white py-2.5 text-sm font-medium border-b border-white/10"
+                  className="text-white py-2.5 text-sm font-medium border-b border-white/10 flex items-center gap-2"
                 >
+                  <span>{item.icon}</span>
                   {item.label}
                 </Link>
               ))}

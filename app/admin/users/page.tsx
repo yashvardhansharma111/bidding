@@ -101,7 +101,87 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Mobile: card list */}
+      <div className="flex flex-col gap-3 md:hidden">
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-32 mb-2" />
+                <div className="h-3 bg-gray-100 rounded w-48" />
+              </div>
+            ))
+          : users.map((u) => (
+              <div key={u._id} className={`bg-white rounded-xl border shadow-sm p-4 ${u.isBanned ? "border-red-200" : "border-gray-100"}`}>
+                {/* Header row */}
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#2874F0] flex items-center justify-center text-white text-sm font-bold shrink-0">
+                      {u.name[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm truncate">{u.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{u.email}</p>
+                    </div>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${u.isBanned ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+                    {u.isBanned ? "Banned" : "Active"}
+                  </span>
+                </div>
+
+                {/* Info row */}
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="bg-gray-50 rounded-lg px-3 py-2">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Phone</p>
+                    <p className="text-xs font-medium text-gray-700">{u.phone || "—"}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg px-3 py-2">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Joined</p>
+                    <p className="text-xs font-medium text-gray-700">{formatDate(u.createdAt)}</p>
+                  </div>
+                </div>
+
+                {/* Wallet row */}
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-gray-900">{fmt(u.walletBalance ?? 0)}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.isVerified ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}>
+                      {u.isVerified ? "Verified" : "Pending"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => { setWalletModal({ user: u, type: "credit" }); setWalletAmount(""); }}
+                      className="flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-200 transition-colors"
+                    >
+                      <Plus size={11} /> Add
+                    </button>
+                    <button
+                      onClick={() => { setWalletModal({ user: u, type: "debit" }); setWalletAmount(""); }}
+                      className="flex items-center gap-1 px-2.5 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-200 transition-colors"
+                    >
+                      <Minus size={11} /> Deduct
+                    </button>
+                  </div>
+                </div>
+
+                {/* Ban button */}
+                <button
+                  onClick={() => handleBan(u._id, u.name, u.isBanned)}
+                  disabled={banningId === u._id}
+                  className={`w-full flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-lg font-semibold transition-colors disabled:opacity-60 ${
+                    u.isBanned
+                      ? "bg-green-50 text-green-700 hover:bg-green-100"
+                      : "bg-red-50 text-red-700 hover:bg-red-100"
+                  }`}
+                >
+                  {u.isBanned ? <><CheckCircle size={13} /> Unban User</> : <><Ban size={13} /> Ban User</>}
+                </button>
+              </div>
+            ))}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden md:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

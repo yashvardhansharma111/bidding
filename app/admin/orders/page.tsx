@@ -33,6 +33,16 @@ interface AdminOrder {
     model: string;
     images: string[];
   };
+  shippingAddress?: {
+    name: string;
+    phone: string;
+    phone2?: string;
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    pincode: string;
+  };
 }
 
 interface ShipFormValues {
@@ -120,14 +130,15 @@ export default function AdminOrdersPage() {
   }
 
   function openShipModal(order: AdminOrder) {
+    const sa = order.shippingAddress;
     setShipForm({
-      name: order.winner.name,
-      phone: order.winner.phone ?? "",
-      address: "",
-      address2: "",
-      city: "",
-      state: "",
-      pincode: "",
+      name: sa?.name || order.winner?.name || "",
+      phone: sa?.phone || order.winner?.phone || "",
+      address: sa?.line1 || "",
+      address2: sa?.line2 || "",
+      city: sa?.city || "",
+      state: sa?.state || "",
+      pincode: sa?.pincode || "",
       weight: "",
       length: "",
       breadth: "",
@@ -235,10 +246,10 @@ export default function AdminOrdersPage() {
                 <div className="flex flex-wrap gap-4 items-start">
                   {/* Auction image */}
                   <div className="w-14 h-14 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
-                    {order.auction.images?.[0] ? (
+                    {order.auction?.images?.[0] ? (
                       <img
                         src={order.auction.images[0]}
-                        alt={order.auction.title}
+                        alt={order.auction?.title ?? ""}
                         className="w-full h-full object-contain rounded-lg p-1"
                       />
                     ) : (
@@ -249,10 +260,10 @@ export default function AdminOrdersPage() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-gray-900 line-clamp-1">
-                      {order.auction.title}
+                      {order.auction?.title ?? "—"}
                     </h3>
                     <p className="text-xs text-gray-400">
-                      {order.auction.brand} {order.auction.model}
+                      {order.auction?.brand} {order.auction?.model}
                     </p>
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
                       <span
@@ -265,11 +276,24 @@ export default function AdminOrdersPage() {
 
                     {/* Winner info */}
                     <div className="mt-1.5 text-xs text-gray-500">
-                      <span className="font-medium text-gray-700">{order.winner.name}</span>
+                      <span className="font-medium text-gray-700">{order.winner?.name ?? "—"}</span>
                       {" — "}
-                      {order.winner.email}
-                      {order.winner.phone ? ` · ${order.winner.phone}` : ""}
+                      {order.winner?.email ?? ""}
+                      {order.winner?.phone ? ` · ${order.winner.phone}` : ""}
                     </div>
+
+                    {/* Address status */}
+                    {order.shippingAddress?.line1 ? (
+                      <div className="mt-1 text-xs text-green-600 flex items-center gap-1">
+                        <MapPin size={10} />
+                        <span>{order.shippingAddress.line1}, {order.shippingAddress.city}, {order.shippingAddress.state} — {order.shippingAddress.pincode}</span>
+                      </div>
+                    ) : order.status === "paid" ? (
+                      <div className="mt-1 text-xs text-orange-500 flex items-center gap-1">
+                        <MapPin size={10} />
+                        <span>Address not filled by customer</span>
+                      </div>
+                    ) : null}
 
                     {/* AWB info for shipped orders */}
                     {(order.status === "shipped" || order.status === "delivered") && order.awbCode && (
@@ -355,7 +379,7 @@ export default function AdminOrdersPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
                     Customer Name *
@@ -407,7 +431,7 @@ export default function AdminOrdersPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
                     City *
@@ -451,7 +475,7 @@ export default function AdminOrdersPage() {
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 mb-3">
                   <Scale size={13} /> Package Dimensions
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Weight (kg) *

@@ -11,6 +11,7 @@ export interface IOrderDoc extends Document {
   shippingAddress?: {
     name: string;
     phone: string;
+    phone2?: string;
     line1: string;
     line2?: string;
     city: string;
@@ -41,6 +42,7 @@ const OrderSchema = new Schema<IOrderDoc>(
     shippingAddress: {
       name: String,
       phone: String,
+      phone2: String,
       line1: String,
       line2: String,
       city: String,

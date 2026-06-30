@@ -29,9 +29,9 @@ export async function POST(
     const price = auction.buyNowPrice ?? auction.baseBidPrice;
     if (!price || price <= 0) return apiError("No price set for this auction", 400);
 
-    // Prevent duplicate orders for same auction
-    const existing = await Order.findOne({ auction: id });
-    if (existing) return apiError("This item has already been purchased", 400);
+    // Prevent same user from buying this listing again
+    const existing = await Order.findOne({ auction: id, winner: user._id });
+    if (existing) return apiError("You have already purchased this item", 400);
 
     // Create order
     const order = await Order.create({
@@ -42,11 +42,6 @@ export async function POST(
       totalAmount: price + (auction.deliveryCharges ?? 0),
       status: "pending_payment",
     });
-
-    // Mark auction ended
-    auction.winner = user._id as any;
-    auction.status = "ended";
-    await auction.save();
 
     // Notify user
     await Notification.create({

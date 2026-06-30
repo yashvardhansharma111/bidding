@@ -31,7 +31,7 @@ function BuyNowPanel({ auction }: { auction: IAuction }) {
     try {
       const { data } = await axios.post(`/api/auctions/${auction._id}/buy-now`);
       setPurchased(true);
-      setTimeout(() => router.push(`/payment/${data.data.orderId}`), 1200);
+      setTimeout(() => router.push(`/orders/${data.data.orderId}/address`), 1200);
     } catch (err: any) {
       setError(err?.response?.data?.error ?? "Purchase failed. Try again.");
     } finally {
@@ -83,13 +83,11 @@ function BuyNowPanel({ auction }: { auction: IAuction }) {
           <div className="flex flex-col items-center gap-2 py-3 text-green-600">
             <CheckCircle size={32} />
             <p className="font-bold">Purchase Confirmed!</p>
-            <p className="text-sm text-gray-500">Redirecting to payment…</p>
+            <p className="text-sm text-gray-500">Redirecting to address form…</p>
           </div>
         ) : isEnded ? (
           <div className="text-center py-4">
-            <p className="text-gray-500 font-medium">
-              {auction.winner ? "This item has been sold." : "This listing has ended."}
-            </p>
+            <p className="text-gray-500 font-medium">This listing has ended.</p>
           </div>
         ) : !isLive ? (
           <div className="text-center py-4">
@@ -128,7 +126,7 @@ function BuyNowPanel({ auction }: { auction: IAuction }) {
             )}
 
             <p className="text-xs text-gray-400 text-center">
-              One-time purchase · Payment due after confirmation
+              Fixed price · Payment due after confirmation
             </p>
           </div>
         )}

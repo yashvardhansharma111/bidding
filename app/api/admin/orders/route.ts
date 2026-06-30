@@ -10,6 +10,7 @@ export async function GET() {
 
     const orders = await Order.find()
       .sort({ createdAt: -1 })
+      .select("auction winner finalAmount deliveryCharges totalAmount status awbCode courierName trackingUrl shippingAddress createdAt")
       .populate({ path: "winner", select: "name email phone" })
       .populate({ path: "auction", select: "title brand model images" })
       .lean();

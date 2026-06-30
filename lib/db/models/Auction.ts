@@ -14,10 +14,13 @@ export interface IAuctionDoc extends Omit<Document, "model"> {
     battery?: string;
     display?: string;
     camera?: string;
+    frontCamera?: string;
+    backCamera?: string;
     os?: string;
     color?: string;
   };
   description: string;
+  customerReview?: string;
   images: string[];
   category: "individual" | "bulk";
   quantity: number;
@@ -48,6 +51,8 @@ const SpecsSchema = new Schema(
     battery: String,
     display: String,
     camera: String,
+    frontCamera: String,
+    backCamera: String,
     os: String,
     color: String,
   },
@@ -64,6 +69,7 @@ const AuctionSchema = new Schema<IAuctionDoc>(
     batchId: { type: String, trim: true },
     specs: { type: SpecsSchema, default: {} },
     description: { type: String, required: true },
+    customerReview: { type: String, trim: true },
     images: [{ type: String }],
     category: { type: String, enum: ["individual", "bulk"], required: true },
     quantity: { type: Number, required: true, min: 1, default: 1 },

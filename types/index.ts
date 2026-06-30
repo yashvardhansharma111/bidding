@@ -43,6 +43,8 @@ export interface IPhoneSpecs {
   battery?: string;
   display?: string;
   camera?: string;
+  frontCamera?: string;
+  backCamera?: string;
   os?: string;
   color?: string;
 }
@@ -57,6 +59,7 @@ export interface IAuction {
   batchId?: string;
   specs: IPhoneSpecs;
   description: string;
+  customerReview?: string;
   images: string[];
   category: AuctionCategory;
   quantity: number;
@@ -118,6 +121,7 @@ export interface IOrder {
   shippingAddress?: {
     name?: string;
     phone?: string;
+    phone2?: string;
     line1: string;
     line2?: string;
     city: string;
