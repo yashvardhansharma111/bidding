@@ -17,21 +17,23 @@ interface Props {
 }
 
 async function getAuction(id: string): Promise<IAuction | null> {
-  await connectDB();
   try {
+    await connectDB();
     const doc = await AuctionModel.findById(id)
       .populate("winner", "name")
       .populate("createdBy", "name")
       .lean();
     if (!doc) return null;
     return JSON.parse(JSON.stringify(doc));
-  } catch {
+  } catch (err) {
+    console.error("[getAuction] id:", id, err);
     return null;
   }
 }
 
 async function getInitialBids(auctionId: string): Promise<IBid[]> {
   try {
+    await connectDB();
     const bids = await BidModel.find({ auction: auctionId })
       .sort({ createdAt: -1 })
       .limit(20)
