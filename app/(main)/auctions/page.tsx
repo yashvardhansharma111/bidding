@@ -74,7 +74,7 @@ export default async function AuctionsPage({ searchParams }: { searchParams: Pro
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Filters sidebar */}
         <aside className="lg:w-64 shrink-0">
-          <AuctionFiltersPanel currentFilters={sp as Record<string, string>} />
+          <AuctionFiltersPanel />
         </aside>
 
         {/* Main content */}
